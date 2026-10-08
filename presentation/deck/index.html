@@ -114,6 +114,14 @@ ul.b li::before{content:"";position:absolute;right:0;top:36px;width:18px;height:
 .pnote{font-size:26px;font-weight:300;margin-top:14px;color:var(--paper)}
 .ask2{margin-top:30px;font-size:44px;font-weight:900;color:var(--hi)}
 
+.prompt{margin-top:40px;background:var(--paper);color:var(--ink);border-radius:22px;padding:36px 44px;font-size:34px;line-height:1.55;max-width:1300px}
+.prompt .pl{display:block;font-size:22px;font-weight:900;color:#8FB0FF;margin-bottom:12px;letter-spacing:.04em}
+.ex{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;margin-top:44px}
+.exc{background:var(--card);border-radius:22px;padding:32px 34px;box-shadow:0 8px 30px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:14px}
+.exc.lit{outline:3px solid var(--hi);background:rgba(8,102,255,.05)}
+.exc .k{font-size:24px;font-weight:900;color:var(--mute)}
+.exc .tg{font-size:40px;font-weight:900;color:var(--hi);line-height:1.2}
+.exc .d{font-size:27px;font-weight:300;line-height:1.4;color:var(--paper)}
 .q .label{text-align:center}
 .q h1{font-size:76px;text-align:center;margin:0 auto;max-width:1300px}
 .corner{position:absolute;top:36px;inset-inline-start:44px;font-size:22px;font-weight:900;color:var(--hi);border:2px solid var(--hi);border-radius:12px;padding:8px 16px;background:var(--card)}
@@ -199,8 +207,10 @@ const S=[
  say:'וזה כל התהליך. שישה שלבים.\n\nהבידול. ההצעה בחינם. עמוד נחיתה עם סינון. הקריאייטיב. הקהל והקמפיין. וההצעה שאתם נותנים בפגישה עצמה.\n\nבכל שלב אני אראה לכם מה צריך, למה עשיתי את מה שעשיתי, ומה עשיתי בפועל.',click:'אחרי "מה עשיתי בפועל".'},
 {L:'T',label:'שלב 1 מתוך 6',h:'הבידול',b:['במה אתם הכי טובים?','לאיזה סוג עסק כבר הבאתם תוצאה?','מה הלקוח מקבל אצלכם, ולא אצל אחרים?'],role:'שלב 1: השאלות.',beats:['שלוש שאלות.','[להוסיף את התשובות של הסוכנות כדוגמה]'],
  say:'שלב ראשון: הבידול.\n\nלפני מודעה, לפני עמוד, צריך לדעת מה אתם מוכרים ולמי.\n\nשלוש שאלות. במה אתם הכי טובים? לאיזה סוג עסק כבר הבאתם תוצאה? ומה הלקוח מקבל אצלכם, ולא אצל אחרים?\n\n[להרחיב לפי מה שעשית עם הסוכנות.]',click:'אחרי השאלה השלישית.'},
-{L:'B',label:'שלב 1 מתוך 6',h:'הבידול של הסוכנות',b:['[הבידול שבחרתם]','טעות נפוצה: "אני עושה הכל".','טעות נפוצה: מחיר זול כבידול.'],vis:'צילום מסך: הבידול של הסוכנות',role:'שלב 1: דוגמה וטעויות.',beats:['הבידול של הסוכנות.','שתי טעויות.'],
- say:'ככה זה נראה אצל הסוכנות.\n\n[לתאר את הבידול שבחרתם ולמה.]\n\nושתי טעויות שאני רואה כל הזמן. הראשונה: "אני עושה הכל". מי שעושה הכל, לא נבחר לשום דבר. השנייה: מחיר זול. זה לא בידול, זו הנחה.',click:'אחרי "זו הנחה".'},
+{L:'PR',label:'שלב 1 מתוך 6',h:'עכשיו תנו לצ\'אט לעבוד',sub:'קחו את כל מה שכתבתם, והדביקו לצ\'אט.',pl:'מה כותבים לצ\'אט',prompt:'הנה כל מה שכתבתי על העסק שלי: [התשובות שלכם]. אני צריך בידול, כי אני לא רוצה להישמע כמו כל אחד אחר בשוק שלי. תן לי שלושה כיווני בידול, ולכל אחד משפט אחד שמסביר אותו.',role:'שלב 1: לתת לצ\'אט לבנות את הבידול.',beats:['לקחת את כל התשובות.','להדביק לצ\'אט.','"אני לא רוצה להישמע כמו כולם."'],
+ say:'עכשיו קחו את כל מה שכתבתם, והדביקו לצ\'אט.\n\nותגידו לו בפשטות: אני צריך בידול, כי אני לא רוצה להישמע כמו כל אחד אחר בשוק שלי.\n\nתבקשו שלושה כיוונים, ולכל אחד משפט אחד שמסביר אותו. ואז תבחרו את זה שמרגיש הכי נכון לכם.',click:'אחרי "הכי נכון לכם".'},
+{L:'EX',label:'שלב 1 מתוך 6',h:'שלוש דוגמאות לבידול',ex:[['הסוכנות','שיווק הוליסטי','מסתכלים על הכל, בוחנים הכל, מתקנים הכל ומחזיקים לכם הכל. במחיר אחד.'],['רואה חשבון','רואה החשבון של הישראלים בארצות הברית','דוחות בשתי המדינות, בעברית, בלי מס כפול ובלי הפתעות.'],['בונה אתרים','אתרים לקליניקות שממלאים את היומן','לא כרטיס ביקור. אתר שכל המטרה שלו היא לקבוע תורים.']],role:'שלב 1: דוגמאות.',beats:['הסוכנות: שיווק הוליסטי.','רואה חשבון לישראלים בארצות הברית.','בונה אתרים לקליניקות.','טעויות: "אני עושה הכל", ומחיר זול כבידול.'],
+ say:'שלוש דוגמאות.\n\nהסוכנות שעשיתי לה את הקמפיין: שיווק הוליסטי. מסתכלים על הכל, בוחנים הכל, מתקנים הכל ומחזיקים לכם הכל. במחיר אחד.\n\nרואה חשבון: רואה החשבון של הישראלים בארצות הברית. דוחות בשתי המדינות, בעברית, בלי מס כפול ובלי הפתעות.\n\nבונה אתרים: אתרים לקליניקות שממלאים את היומן. לא כרטיס ביקור, אלא אתר שכל המטרה שלו היא לקבוע תורים.\n\nושתי טעויות שאני רואה כל הזמן. הראשונה: "אני עושה הכל". מי שעושה הכל, לא נבחר לשום דבר. השנייה: מחיר זול. זה לא בידול, זו הנחה.',click:'אחרי "זו הנחה".'},
 {L:'T',label:'שלב 2 מתוך 6',h:'ההצעה בחינם',b:['למה פגישת ייעוץ: הכי קל להגיד לה כן.','הצעה חזקה: תוצאה ספציפית, לקהל ספציפי.','בפגישה אתם מאבחנים. לא מוכרים.'],role:'שלב 2: למה פגישת ייעוץ.',beats:['קל להגיד כן.','ספציפי.','מאבחנים, לא מוכרים.'],
  say:'שלב שני: ההצעה בחינם.\n\nלמה פגישת ייעוץ? כי זה הדבר שהכי קל להגיד לו כן. בלי סיכון, בלי התחייבות.\n\nהצעה חזקה מבטיחה תוצאה ספציפית, לקהל ספציפי.\n\nובפגישה עצמה אתם לא מוכרים. אתם מאבחנים. מי שמאבחן טוב, לא צריך למכור.',click:'אחרי "לא צריך למכור".'},
 {L:'B',label:'שלב 2 מתוך 6',h:'ההצעה של הסוכנות',b:['[ההצעה כפי שנוסחה]','[למה דווקא היא]'],vis:'צילום מסך: ההצעה כפי שהופיעה במודעה',role:'שלב 2: דוגמה.',beats:['ההצעה של הסוכנות.','למה היא עבדה.'],
@@ -291,6 +301,8 @@ function render(s){
     case 'CALC':inner='<h1 class="h-m">'+esc(s.h)+'</h1><ul class="calc">'+s.calc.map((x,i)=>'<li'+(i>1?' class="frag"':'')+'>'+x+'</li>').join('')+'<li class="res frag">'+esc(s.res)+'</li></ul>';break;
     case 'MAP':inner='<h1 class="h-l" style="text-align:center">'+esc(s.h)+'</h1><ol class="map">'+s.steps.map((t,i)=>'<li><span class="rn">'+(i+1)+'</span><span class="rt">'+esc(t)+'</span></li>').join('')+'</ol>';break;
     case 'OFFER':cls+=' offer';inner='<div class="ol"><h1 class="h-m">'+esc(s.h)+'</h1><p class="sub" style="font-size:32px;margin-top:20px">'+esc(s.sub)+'</p>'+bullets(s.items)+'</div><div class="or"><div class="strike">2,870 ₪</div><div class="price">1,897 ₪</div><div class="pnote">אחרי זיכוי של 147 ₪ למשתתפי ההדרכה</div><div class="pnote">'+esc(LINK)+'</div><div class="ask2">מעניין אתכם?</div></div>';break;
+    case 'PR':inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+(s.sub?'<p class="sub" style="margin-top:20px">'+esc(s.sub)+'</p>':'')+'<div class="prompt"><span class="pl">'+esc(s.pl||'')+'</span>'+esc(s.prompt)+'</div>';break;
+    case 'EX':inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1><div class="ex">'+s.ex.map((e,i)=>'<div class="exc'+(i===0?' lit':'')+'"><div class="k">'+esc(e[0])+'</div><div class="tg">'+esc(e[1])+'</div><div class="d">'+esc(e[2])+'</div></div>').join('')+'</div>';break;
     case 'Q':cls+=' center q';inner=lab+'<h1>'+esc(s.h)+'</h1>';break;
   }
   if(s.foot)inner+='<p class="foot">'+esc(s.foot)+'</p>';
