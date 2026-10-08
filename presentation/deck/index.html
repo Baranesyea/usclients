@@ -74,6 +74,8 @@ ul.b li::before{content:"";position:absolute;right:0;top:36px;width:18px;height:
 .vis.real img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
 .split .vis.real.portrait{flex:0 0 480px;height:640px}
 .vis.real.portrait img{object-position:center 45%}
+.split .vis.real.copyimg{flex:0 0 480px;height:754px;padding:0;background:#fff}
+.vis.real.copyimg img{object-fit:contain;width:100%;height:100%}
 .split .vis.real.duo{flex:0 0 auto;height:auto;display:flex;gap:20px;padding:0;background:transparent;box-shadow:none;justify-content:center;align-items:center;overflow:visible}
 .vis.real.duo img{width:400px;height:501px;flex:0 0 400px;object-fit:cover;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.18)}
 .split .vis.real.tallimg{flex:0 0 560px;height:700px;background:#000;padding:0}
@@ -239,6 +241,8 @@ const S=[
  say:'שלב רביעי: הקריאייטיב.\n\nכל מודעה עם זווית אחת. לא שלוש.\n\nוהמודעה בעברית. זה הסינון הראשון. מי שלא קורא עברית, פשוט ממשיך לגלול.\n\nמה עוצר את הגלילה? משהו שהם מזהים מהחיים שלהם.',click:'אחרי "מהחיים שלהם".'},
 {L:'B',label:'שלב 4 מתוך 6',h:'עיצוב',b:['מסר אחד, טקסט גדול.','ניגודיות חזקה.','פונט עברי קריא.','מספר אחד שעוצר את הגלילה.'],imgs:['img/ad-5.jpg','img/ad-6.jpg'],vis:'דוגמאות למודעות של הסוכנות',role:'שלב 4: דגשי עיצוב.',beats:['מסר אחד.','ניגודיות.','פונט.'],
  say:'כמה דגשים בעיצוב.\n\nמסר אחד, וטקסט גדול. אנשים רואים את המודעה בטלפון, לשנייה.\n\nניגודיות חזקה.\n\nופונט עברי קריא.\n\nתסתכלו על שתי המודעות של הסוכנות. בראשונה: מספר אחד גדול, 4,000 דולר בחודש, וכל השאר משרת אותו. בשנייה: מה מקבלים בפגישה, ברשימה שנקראת בשנייה.',click:'אחרי הדוגמאות.'},
+{L:'B',label:'שלב 4 מתוך 6',h:'הקופי',b:['פותחים במספרים שכואבים: כמה עולה כוח אדם.','מראים מה סוכן בינה מלאכותית עושה במקום.','מורידים את הפחד: "אני לא אומר לפטר אף אחד."','ההצעה: ללא עלות, ומה יוצאים איתו.','קריאה אחת לפעולה.'],img:'img/ad-copy.png',copy:true,vis:'הקופי של המודעה של הסוכנות',role:'שלב 4: מבנה הקופי.',beats:['מספרים שכואבים.','מה הסוכן עושה במקום.','להוריד את הפחד.','הצעה ללא עלות.','קריאה אחת.'],
+ say:'עכשיו הטקסט של המודעה. ככה הוא בנוי.\n\nפותחים במספרים: עובד אדמיניסטרטיבי, 4,000 דולר בחודש. נציג שירות, 3,500. בעל עסק בארצות הברית קורא את זה ומרגיש את זה בכיס.\n\nואז: חלק גדול ממה שהם עושים, סוכן בינה מלאכותית עושה היום. מהר יותר, בלי טעויות.\n\nואז מורידים את הפחד: אני לא אומר לפטר אף אחד. אני אומר שאפשר לגדול בלי לגייס עוד.\n\nההצעה: פגישת התייעלות עסקית, ללא עלות. עוברים על העסק, מוצאים 3 עד 10 מקומות לחסוך, ויוצאים עם תוכנית פעולה.\n\nוקריאה אחת לפעולה: קבעו פגישה.\n\nשימו לב גם לכותרת: "כמה עולה לכם כוח אדם בארה״ב? בואו נחסוך חלק מזה." שאלה, ומיד ההבטחה.',click:'אחרי "ומיד ההבטחה".'},
 {L:'F',label:'שלב 4 מתוך 6',h:'עם היגספילד, ובלי',cols:[['עם היגספילד',['[מה יצא]','[כמה זמן לקח]']],['בלי',['[הכלי החינמי]','[מה יצא]']]],role:'שלב 4: שתי דרכים.',beats:['שתי הדרכים.','לא חייבים לשלם על עוד כלי.'],
  say:'ואפשר לעשות את זה בשתי דרכים.\n\nעם היגספילד. [להראות תוצרים.]\n\nובלי, אם לא רוצים לשלם על עוד כלי. [להראות תוצרים.]',click:'אחרי שתי הדוגמאות.'},
 {L:'T',label:'שלב 5 מתוך 6',h:'הקהל והקמפיין',b:['מיקום: ארצות הברית.','המודעה בעברית עושה את הסינון.','תקציב בדיקה: 500 ₪, כ־35 ₪ ליום לשבועיים.'],role:'שלב 5: הגדרות ותקציב.',beats:['ארצות הברית.','העברית מסננת.','500 ₪ לבדיקה.'],
@@ -298,7 +302,7 @@ QS.forEach((q,i)=>S.push({L:'Q',label:q[0],h:q[1],corner:true,role:'שאלה '+(
 const frame=document.getElementById('frame');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const bullets=a=>'<ul class="b">'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
-const visBox=(s)=>s.imgs?'<div class="vis real duo">'+s.imgs.map(u=>'<img src="'+u+'" alt="">').join('')+'</div>':s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+(s.portrait?' portrait':'')+(s.tall?' tallimg':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
+const visBox=(s)=>s.imgs?'<div class="vis real duo">'+s.imgs.map(u=>'<img src="'+u+'" alt="">').join('')+'</div>':s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+(s.portrait?' portrait':'')+(s.tall?' tallimg':'')+(s.copy?' copyimg':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
 function render(s){
   let inner='',cls='slide';
   const hcls=s.size==='xl'?'h-xl':'h-l';
