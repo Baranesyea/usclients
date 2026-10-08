@@ -1,0 +1,350 @@
+<title>לקוחות בדולרים</title>
+<style>
+/* Layout: presenter view (16:9 stage + notes rail) or full stage; slides on a 1600x900 canvas, scaled to fit. RTL throughout. */
+@font-face{font-family:"FbOptimum";src:url("fonts/FbOptimum-Light.otf") format("opentype");font-weight:300;font-display:block}
+@font-face{font-family:"FbOptimum";src:url("fonts/FbOptimum-Regular.otf") format("opentype");font-weight:400;font-display:block}
+@font-face{font-family:"FbOptimum";src:url("fonts/FbOptimum-Black.otf") format("opentype");font-weight:900;font-display:block}
+:root{
+  --ink:#F7F7F4; --paper:#111214; --hi:#0866FF; --mute:#6E716E; --rule:#DCDCD6; --glow:rgba(8,102,255,.28); --ok:#1F9D63; --card:#FFFFFF;
+  --panel:#F3F2EE; --panel-ink:#1A1A17; --panel-soft:#5E5F5B; --panel-rule:#D8D5CC; --alert:#C9372C;
+  --f:"FbOptimum","Arial Hebrew",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--panel:#121416;--panel-ink:#ECEAE4;--panel-soft:#9B9C99;--panel-rule:#2A2D30;color-scheme:dark}}
+:root[data-theme="dark"]{--panel:#121416;--panel-ink:#ECEAE4;--panel-soft:#9B9C99;--panel-rule:#2A2D30;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--panel);color:var(--panel-ink);font-family:var(--f);overflow:hidden}
+
+#app{direction:rtl;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);grid-template-rows:1fr auto;height:100%}
+#stageWrap{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:1.2rem;min-width:0;min-height:0;background:var(--panel)}
+#notes{border-inline-start:1px solid var(--panel-rule);padding:1.4rem 1.6rem;overflow:auto;min-height:0;display:flex;flex-direction:column;gap:1.1rem;min-width:0}
+#bar{grid-column:1/-1;border-top:1px solid var(--panel-rule);display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;padding:.6rem 1rem;font-weight:900;font-size:.9rem}
+#bar button{font:inherit;padding:.45rem .8rem;border:1px solid var(--panel-rule);background:transparent;color:var(--panel-ink);border-radius:8px;cursor:pointer}
+#bar button:hover,#bar button:focus-visible{border-color:var(--panel-ink);outline:none}
+#bar .spacer{flex:1}
+#bar .kbd{color:var(--panel-soft);font-weight:400}
+.nl{font-weight:900;font-size:.78rem;letter-spacing:.06em;color:var(--panel-soft);margin:0 0 .3rem}
+#sayTxt{font-size:1.15rem;line-height:1.7;margin:0;white-space:pre-line}
+#clickTxt{font-size:1rem;line-height:1.5;margin:0}
+#nextTxt{font-weight:900;font-size:1rem;margin:0;color:var(--panel-soft)}
+#meta{font-weight:900;font-size:.9rem;color:var(--panel-soft);display:flex;gap:1rem}
+.big{color:var(--panel-ink);font-size:1.1rem}
+#beatsUl{margin:0;padding-inline-start:1.1rem;font-size:1.2rem;line-height:1.55}
+
+body.stage #app{grid-template-columns:1fr;grid-template-rows:1fr}
+body.stage #notes,body.stage #bar{display:none}
+body.stage #stageWrap{padding:0;background:#ECECE8}
+
+#frame{direction:rtl;position:relative;flex:none;width:1600px;height:900px;transform-origin:center center;background:var(--ink);color:var(--paper);border-radius:14px;overflow:hidden;box-shadow:0 0 0 3px var(--glow),0 0 48px 6px rgba(8,102,255,.18),0 24px 60px rgba(0,0,0,.12);font-family:var(--f)}
+body.stage #frame{border-radius:0;box-shadow:none}
+.slide{position:absolute;inset:0;padding:100px 130px;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateX(-40px);transition:opacity .38s ease,transform .38s ease;pointer-events:none}
+.slide.on{opacity:1;transform:none;pointer-events:auto}
+.slide.off{transform:translateX(40px)}
+.frag{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s}
+.frag.show{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.slide,.frag{transition:none}}
+
+#prog{position:absolute;inset-inline:0;bottom:0;height:6px;background:rgba(8,102,255,.12);z-index:5}
+#prog i{display:block;height:100%;width:0;background:var(--hi);transition:width .4s ease;margin-inline-start:0}
+.label{font-weight:900;font-size:24px;letter-spacing:.04em;color:var(--hi);margin:0 0 22px}
+h1{font-weight:900;line-height:1.18;margin:0;color:var(--hi);text-wrap:balance}
+.h-xl{font-size:130px;max-width:1300px}
+.h-l{font-size:80px;max-width:1300px}
+.h-m{font-size:62px}
+.sub{font-size:38px;font-weight:300;line-height:1.4;color:var(--paper);margin:34px 0 0;max-width:1150px}
+.center{align-items:center;text-align:center}
+.center .sub{margin-inline:auto}
+ul.b{list-style:none;margin:40px 0 0;padding:0;max-width:1250px}
+ul.b li{font-size:40px;font-weight:400;line-height:1.35;padding:18px 48px 18px 0;position:relative;border-top:1px solid var(--rule)}
+ul.b li:first-child{border-top:none}
+ul.b li::before{content:"";position:absolute;right:0;top:36px;width:18px;height:18px;background:var(--hi)}
+.cap{font-size:32px;font-weight:300;color:var(--paper);margin:26px 0 0;text-align:center}
+.foot{position:absolute;bottom:34px;inset-inline:130px;font-size:22px;font-weight:300;color:var(--mute);text-align:center}
+.askchip{position:absolute;inset-inline:0;margin:0 auto;bottom:52px;font-size:32px;font-weight:900;color:var(--hi);padding:14px 26px;border:3px solid var(--hi);border-radius:14px;background:var(--card);width:max-content;max-width:1340px}
+
+.split{flex-direction:row;align-items:center;gap:80px}
+.split .txt{flex:1.05;min-width:0}
+.split .vis{flex:1;height:600px}
+.lc{justify-content:flex-start;padding-top:80px}
+.lc h1{text-align:center;margin:0 auto}
+.lc .vis{margin:36px auto 0;width:1200px;height:560px}
+.vis{border:3px dashed rgba(8,102,255,.35);border-radius:22px;background:var(--card);display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:30px;line-height:1.4;color:var(--paper)}
+.vis b{display:block;color:var(--hi);font-size:22px;margin-bottom:12px}
+.vis.real{border:none;padding:0;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.14)}
+.vis.real img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+
+.big3{flex-direction:row;gap:70px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.big3 h1{width:100%;text-align:center;margin-bottom:30px}
+.big3 .cell{flex:1;min-width:0;text-align:center}
+.bign{font-weight:900;font-size:120px;line-height:1;color:var(--hi);white-space:nowrap}
+.bigc{font-size:34px;font-weight:300;margin:20px 0 0;color:var(--paper);line-height:1.3}
+.big3 .cap{width:100%}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:28px 60px;margin-top:44px}
+.stat{padding:28px 34px;border-radius:20px;background:var(--card);box-shadow:0 8px 30px rgba(0,0,0,.06)}
+.stat.lit{outline:3px solid var(--hi);background:rgba(8,102,255,.06)}
+.stat .n{font-weight:900;font-size:72px;line-height:1.05;color:var(--paper);font-variant-numeric:tabular-nums}
+.stat.lit .n{color:var(--hi)}
+.stat .t{font-size:28px;font-weight:300;margin-top:8px;color:var(--paper)}
+
+.calc{list-style:none;margin:36px 0 0;padding:0}
+.calc li{font-size:36px;line-height:1.35;padding:16px 0;border-top:1px solid var(--rule)}
+.calc li:first-child{border-top:none}
+.calc li b{color:var(--hi);font-weight:900}
+.calc .res{margin-top:22px;font-size:54px;font-weight:900;color:var(--hi);border-top:none}
+
+.map{list-style:none;margin:50px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.map li{background:var(--card);border-radius:20px;padding:30px 34px;box-shadow:0 8px 30px rgba(0,0,0,.06);display:flex;gap:22px;align-items:center}
+.map .rn{flex:none;width:72px;height:72px;border-radius:50%;background:var(--hi);color:#fff;font-weight:900;font-size:40px;display:flex;align-items:center;justify-content:center}
+.map .rt{font-size:36px;font-weight:900;line-height:1.2}
+
+.offer{flex-direction:row;gap:70px;align-items:stretch;padding-top:80px;padding-bottom:80px}
+.offer .ol{flex:1.35;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.offer ul.b{margin-top:26px}
+.offer ul.b li{font-size:32px;padding-top:12px;padding-bottom:12px}
+.offer ul.b li::before{top:28px}
+.offer .or{flex:.8;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:var(--card);border-radius:26px;box-shadow:0 10px 36px rgba(0,0,0,.08);padding:40px}
+.strike{font-weight:900;font-size:64px;color:var(--mute);text-decoration:line-through}
+.price{font-weight:900;font-size:140px;color:var(--ok);line-height:1;margin-top:10px}
+.pnote{font-size:26px;font-weight:300;margin-top:14px;color:var(--paper)}
+.ask2{margin-top:30px;font-size:44px;font-weight:900;color:var(--hi)}
+
+.q .label{text-align:center}
+.q h1{font-size:76px;text-align:center;margin:0 auto;max-width:1300px}
+.corner{position:absolute;top:36px;inset-inline-start:44px;font-size:22px;font-weight:900;color:var(--hi);border:2px solid var(--hi);border-radius:12px;padding:8px 16px;background:var(--card)}
+
+@media (max-width:900px){
+  #app{grid-template-columns:1fr;grid-template-rows:minmax(240px,45vh) 1fr auto}
+  #notes{border-inline-start:none;border-top:1px solid var(--panel-rule)}
+}
+</style>
+
+<div id="app">
+  <div id="stageWrap"><div id="frame"><div id="prog"><i></i></div></div></div>
+  <aside id="notes">
+    <div id="meta"><span class="big" id="counter">1 / 1</span><span id="elapsed">00:00</span></div>
+    <div><p class="nl">השקף הזה</p><p id="roleTxt" style="font-weight:900;font-size:1.1rem;margin:0"></p></div>
+    <div><p class="nl">נקודות</p><ul id="beatsUl"></ul></div>
+    <div id="askBox" hidden><p class="nl">שאלה לצ'אט</p><p id="askTxt" style="font-size:1.1rem;font-weight:900;margin:0"></p></div>
+    <div><p class="nl" style="cursor:pointer" id="sayToggle" tabindex="0" role="button">תסריט מלא ◂</p><p id="sayTxt" hidden></p></div>
+    <div><p class="nl">לחיצה</p><p id="clickTxt"></p></div>
+    <div><p class="nl">הבא</p><p id="nextTxt"></p></div>
+  </aside>
+  <div id="bar">
+    <button id="next" type="button">הבא ←</button>
+    <button id="prev" type="button">→ הקודם</button>
+    <span class="kbd">רווח או חיצים כדי להתקדם. Esc יוצא ממצב במה.</span>
+    <span class="spacer"></span>
+    <button id="resetT" type="button">איפוס שעון</button>
+    <button id="stageHere" type="button">מצב במה בחלון הזה</button>
+    <button id="openStage" type="button">פתיחת במה בלשונית חדשה</button>
+  </div>
+</div>
+
+<script>
+/* ================= CONTENT ================= */
+const LINK='[לינק לסדנת ההמשך]';
+const S=[
+{L:'A',size:'xl',h:'לקוחות בדולרים',sub:'הגשר לארצות הברית',role:'פתיחה. מה ההבטחה של הערב.',beats:['ברוכים הבאים.','שעה וחצי, פרקטי לגמרי.','"תביאו דף ועט."'],
+ say:'ערב טוב לכולם, ותודה שהגעתם.\n\nבשעה וחצי הקרובות אני הולך להראות לכם איך מגיעים ללקוחות בארצות הברית, שמשלמים בדולרים, בלי איש מכירות ובלי שיחות קרות.\n\nתביאו דף ועט. יהיו כאן כמה דברים שתרצו לרשום.',click:'אחרי "שתרצו לרשום".'},
+{L:'A',h:'כמה ימי עבודה אמיתיים היו לכם באוגוסט וספטמבר?',ask:'כתבו בצ\'אט מספר',role:'הכאב. שהם יכתבו אותו בעצמם.',beats:['שאלה לצ\'אט.','לקרוא כמה מספרים בקול.','"אתם לא לבד."'],
+ say:'לפני שמתחילים, שאלה אחת. ואני רוצה לשמוע מכם.\n\nכמה ימי עבודה אמיתיים היו לכם באוגוסט וספטמבר? כתבו בצ\'אט מספר.\n\n[עצירה. לקרוא שלושה או ארבעה מספרים בקול.]\n\nאז אתם לא לבד. וזה בדיוק מה שאנחנו הולכים לשנות הערב.',click:'אחרי "לשנות הערב".'},
+{L:'A',h:'עד סוף ההדרכה תראו את כל התהליך',sub:'שהביא לסוכנות ישראלית פגישה ראשונה עם לקוח בארצות הברית, אחרי יום וחצי.',role:'ההבטחה. האמונה בפעם הראשונה.',beats:['כל התהליך, שלב אחרי שלב.','סוכנות ישראלית, יום וחצי.','"ואני מתכוון לכל התהליך."'],
+ say:'עד סוף ההדרכה תראו את כל התהליך שבניתי לסוכנות ישראלית.\n\nתהליך שהביא לה פגישה ראשונה עם לקוח בארצות הברית, אחרי יום וחצי.\n\nואני מתכוון לכל התהליך. מה צריך, למה עשיתי כל דבר, ומה עשיתי בפועל.',click:'אחרי "מה עשיתי בפועל".'},
+{L:'T',h:'תיאום ציפיות',b:['הדרכה פרקטית: מה עושים, ואיך עושים.','לא עובדים יחד על המחשבים. יש לנו שעה וחצי.','מי שירצה עזרה בביצוע, נדבר על זה בסוף.'],role:'תיאום ציפיות. להוריד התנגדות מראש.',beats:['הרבה שאלו אותי.','פרקטי מאוד, אבל לא עבודה משותפת על מחשבים.','מי שצריך עזרה, יש אפשרות. בסוף.'],
+ say:'הרבה שאלו אותי לפני ההדרכה, וחשוב לי לעשות תיאום ציפיות.\n\nההדרכה הזאת פרקטית מאוד. תצאו ממנה עם ידע והבנה של מה לעשות ואיך לעשות.\n\nאבל זו לא סדנה שבה מתחלקים לקבוצות וכולם פותחים מחשב ועושים יחד. יש לנו שעה וחצי.\n\nמי שיחליט בסוף שהוא צריך עזרה לעשות את זה, מכל סיבה שהיא, יש אפשרות. נדבר על זה בסוף.',click:'אחרי "נדבר על זה בסוף".'},
+{L:'B',h:'מי אני',b:['[שורה אחת על הרקע שלך]','[שורה אחת על מה שאתה עושה היום]'],vis:'תמונה שלך בעבודה',role:'אמון. רגע אישי אמיתי.',beats:['מי אני, בשתי שורות.','[הסיפור האישי: פעם שנתקעת או שההכנסה נפגעה בגלל המצב]','לחבר לכאב שלהם.'],
+ say:'רגע, מי אני.\n\n[שתי שורות על הרקע שלך.]\n\n[כאן הסיפור האישי: פעם שנתקעת, שלקוח נעלם בגלל המצב, או שההכנסה נפגעה. רגע אמיתי, לא ענווה.]\n\nאז כשאני מדבר על זה, אני מדבר מבפנים.',click:'אחרי "מבפנים".'},
+{L:'T',h:'השוק בישראל',b:['חגים, ועוד חגים.','מלחמה, מילואים, אזעקות.','לקוחות שמקפיאים פרויקטים ברגע האחרון.'],role:'הבעיה דחופה עכשיו.',beats:['חגים.','מלחמה ומילואים.','לקוחות שמקפיאים.'],
+ say:'בואו נדבר רגע על השוק שאנחנו עובדים בו.\n\nחגים, ועוד חגים. מלחמה, מילואים, אזעקות.\n\nולקוחות שאומרים "בואו נדבר אחרי החגים", או מקפיאים פרויקט ברגע האחרון.\n\nכל אחד כאן מכיר את זה מקרוב.',click:'אחרי "מכיר את זה מקרוב".'},
+{L:'A',h:'כולם כבר בילדרים.',frags:['ועוד דוכן פלאפל ברחוב שיש בו עשרים, לא ישנה את התמונה.'],role:'מה שעשיתי עד היום לא יכול לעבוד.',beats:['השוק רווי.','המחירים יורדים.','לחיצה: אנלוגיית הפלאפל.'],
+ say:'ויש עוד משהו. בישראל, כולם כבר בילדרים.\n\nכל אחד מכיר מישהו שבונה סוכנים. התחרות עצומה, והמחירים רק יורדים.\n\n[לחיצה]\n\nולפתוח עוד דוכן פלאפל ברחוב שיש בו כבר עשרים, לא ישנה את התמונה.',click:'לחיצה אחת חושפת את השורה השנייה. אחר כך הבא.'},
+{L:'A',h:'זה לא אתם. זה השוק.',sub:'עוד פוסטים ועוד נטוורקינג לא ישנו את זה.',role:'להוריד את האשמה.',beats:['זה לא הכישרון שלכם.','זה השוק.','עוד מאותו דבר לא יעזור.'],
+ say:'וחשוב לי להגיד את זה בפה מלא. זה לא אתם. זה השוק.\n\nעוד פוסטים, עוד נטוורקינג, עוד הנחה ללקוח. זה לא ישנה את המבנה.\n\nמה שכן משנה, זה איפה אתם מחפשים לקוחות.',click:'אחרי "מחפשים לקוחות".'},
+{L:'BIG3',h:'ההזדמנות',cells:[['36.2 מיליון','עסקים קטנים בארצות הברית'],['$','משלמים בדולרים'],['0','לא מעניין אותם מה קורה פה']],cap:'מקור: מנהל העסקים הקטנים האמריקאי, 2025',role:'ההזדמנות. שיצמח רעב.',beats:['36.2 מיליון עסקים קטנים.','משלמים בדולרים.','לא מעניין אותם מה קורה פה.'],
+ say:'עכשיו תסתכלו על הצד השני.\n\nבארצות הברית יש 36.2 מיליון עסקים קטנים.\n\nהם משלמים בדולרים. ולא מעניין אותם אם אצלנו חג, מלחמה או אזעקה.',click:'אחרי "אזעקה".'},
+{L:'A',h:'לא צריך לכבוש את אמריקה.',frags:['צריך להגיע לישראלים שכבר כבשו אותה.'],role:'ההיפוך. האמונה, פעם שנייה.',beats:['רוב האנשים חושבים: אנגלית, אמריקאים, שיחות קרות.','לחיצה: הישראלים שכבר שם.','לא לומדים שפה חדשה. מוכרים לשכן שעבר לשם.'],
+ say:'כשאנשים שומעים "לקוחות בארצות הברית", הם חושבים על אנגלית מושלמת, על אמריקאים, ועל שיחות קרות.\n\nאבל לא צריך לכבוש את אמריקה.\n\n[לחיצה]\n\nצריך להגיע לישראלים שכבר כבשו אותה.\n\nלא לומדים שפה חדשה כדי למכור בחו״ל. מוכרים לשכן שעבר לשם.',click:'לחיצה אחת חושפת את השורה השנייה.'},
+{L:'T',h:'למה דווקא הם',b:['מדברים עברית.','משלמים בדולרים.','לא כולם רוצים לעבוד עם ישראלים, ואנחנו לא ננסה לשנות אותם. יש מספיק שישמחו.'],role:'למה הקהל הזה.',beats:['עברית.','דולרים.','לא כולם, ולא צריך את כולם.'],
+ say:'למה דווקא הם?\n\nהם מדברים עברית. אין מחסום שפה, ואין צורך להסביר מי אתם.\n\nהם משלמים בדולרים.\n\nועכשיו בכנות: לא כולם רוצים לעבוד עם ישראלים. חלק נמאס להם. ואנחנו לא מתכוונים לשנות אותם.\n\nיש מספיק שישמחו.',click:'אחרי "שישמחו".'},
+{L:'STATS',h:'הקהילה הכי יזמית בארצות הברית',stats:[['200 אלף עד מיליון','ישראלים בארצות הברית, לפי ההערכות',0],['36.2 מיליון','עסקים קטנים בארצות הברית',0],['37 מכל 1,000','עובדים בארצות הברית הם בעלי חברה',0],['140 מכל 1,000','ישראלים בארצות הברית הם בעלי חברה',1]],foot:'מקורות: ויקיפדיה, JTA, מנהל העסקים הקטנים האמריקאי, Immigration Research Initiative (נתוני 2023)',role:'הוכחה שהקהל קיים, והוא יזמי.',beats:['כמה ישראלים יש שם.','כמה עסקים יש בארצות הברית.','37 מול 140: כמעט פי ארבעה.'],
+ say:'עכשיו בואו נראה כמה הם.\n\nההערכות על מספר הישראלים בארצות הברית נעות בין 200 אלף למיליון.\n\nבארצות הברית כולה יש 36.2 מיליון עסקים קטנים.\n\nובממוצע, 37 מכל 1,000 עובדים בארצות הברית הם בעלי חברה.\n\nאצל הישראלים? 140 מכל 1,000. כמעט פי ארבעה.\n\nמבין 50 ארצות המוצא הגדולות של מהגרים בארצות הברית, לישראלים יש את שיעור בעלי העסקים הגבוה ביותר.',click:'אחרי "הגבוה ביותר".'},
+{L:'C',h:'140 מכל 1,000',img:'img/iri-business-owners.jpg',cap:'"לילידי ישראל יש את שיעור בעלי העסקים הגבוה ביותר: 140 לכל 1,000 עובדים"',role:'המקור, על המסך.',beats:['להראות את המשפט בסוף הפסקה.','"זה לא אני. זה מחקר."'],
+ say:'וזה לא אני אומר. זה המחקר עצמו.\n\nתסתכלו על המשפט בסוף הפסקה: מבין 50 ארצות המוצא הגדולות, לילידי ישראל יש את שיעור בעלי העסקים הגבוה ביותר. 140 לכל 1,000 עובדים.',click:'אחרי "1,000 עובדים".',
+ note:'אם ישאלו: בנתוני הלשכה האמריקאית ישראל ופלסטין מופיעות כקבוצה אחת.'},
+{L:'CALC',h:'וכמה עצמאים?',calc:['כל הנתונים שמתפרסמים סופרים רק <b>חברות רשומות</b>.','עצמאים בלי חברה? <b>הנתון הזה לא מתפרסם.</b>','ישראלים פותחים חברה <b>כמעט פי 4</b> מהממוצע (140 מול 37).','בארצות הברית <b>כ־10%</b> מהעובדים עצמאים. אצל הישראלים: <b>כשליש</b>.','200,000 ישראלים × חצי עובדים × שליש עצמאים ≈ <b>30,000</b>'],res:'ההערכה: בין 30 אלף ל־150 אלף עסקים ועצמאים ישראלים',foot:'הערכה לפי נוסחה, לא נתון רשמי. עצמאים בארצות הברית: כ־16.6 מיליון (הלשכה האמריקאית לסטטיסטיקה של העבודה)',role:'הערכה שקופה. להראות את החשבון.',beats:['המידע לא מתפרסם.','הנוסחה, שורה אחרי שורה.','שמרני: 30 אלף. גבוה: 150 אלף.'],
+ say:'אבל יש פה בעיה. כל הנתונים שמתפרסמים סופרים רק חברות רשומות.\n\nעצמאים בלי חברה? המידע הזה לא מתפרסם.\n\nאז עשיתי חשבון.\n\nישראלים פותחים חברה כמעט פי ארבעה מהממוצע.\n\nבארצות הברית בערך 10% מהעובדים עצמאים. אצל הישראלים, לפי אותו יחס, זה בערך שליש. וזה גם מה שמחקרים ישנים יותר מצאו.\n\nבהערכה השמרנית: 200 אלף ישראלים, חצי מהם עובדים, שליש מהם עצמאים. זה בערך 30 אלף עסקים.\n\nובהערכה הגבוהה, עם מיליון ישראלים, מדובר ב־150 אלף.\n\nאז אנחנו מדברים על עשרות אלפי בעלי עסקים ישראלים. ומספיק לכם שניים או שלושה.',click:'אחרי "שניים או שלושה".'},
+{L:'T',h:'ואז פנתה אליי סוכנות',b:['רצו לקוחות בארצות הברית.','בלי לגייס איש מכירות.','ושאלה אחת: זה בכלל אפשרי?'],role:'הסיפור. הבעיה של מישהו אחר.',beats:['סוכנות ישראלית.','בלי איש מכירות.','"זה בכלל אפשרי?"'],
+ say:'לפני כמה שבועות פנתה אליי סוכנות ישראלית.\n\nהם רצו להתחיל לעבוד עם לקוחות בארצות הברית. אבל היה להם תנאי אחד: הם לא רצו לגייס איש מכירות.\n\nוהם שאלו אותי שאלה אחת. זה בכלל אפשרי?\n\nישבתי על זה, ותכננתי תהליך שהאמנתי שיעבוד. כשסיימתי, הוא היה כל כך פשוט שלא הבנתי איך אף אחד לא עושה את זה.\n\nהם אמרו: יאללה, מתחילים.',click:'אחרי "יאללה, מתחילים".'},
+{L:'BIG3',h:'מה קרה',cells:[['יום וחצי','עד הפגישה הראשונה'],['2 ביום','בממוצע, במשך שלושה שבועות'],['45 ₪','לפגישה עם לקוח שעבר סינון']],cap:'ובפגישות האלה: הצעות לריטיינרים של 1,500 עד 2,000 דולר.',role:'ההוכחה. האמונה, פעם שלישית.',beats:['יום וחצי.','שתי פגישות ביום.','45 ₪ לפגישה.','ריטיינרים של 1,500 עד 2,000 דולר.'],
+ say:'והנה מה שקרה.\n\nהפגישה הראשונה נקבעה אחרי יום וחצי.\n\nבמשך שלושה שבועות, הם קיבלו בממוצע שתי פגישות ביום, עם בעלי עסקים ישראלים בארצות הברית.\n\nכל פגישה כזאת, עם לקוח שעבר סינון, עלתה להם 45 ₪.\n\nובפגישות האלה הם הציעו ריטיינרים של 1,500 עד 2,000 דולר.',click:'אחרי "2,000 דולר".'},
+{L:'C',h:'היומן שלהם',vis:'צילום מסך מהקלנדלי של הסוכנות, עם שמות מטושטשים',cap:'זה לא אומר שאצלכם יהיה אותו מחיר או אותו קצב.',role:'הוכחה ויזואלית, והסייג.',beats:['להראות את היומן.','הסייג, בפה מלא.'],
+ say:'זה היומן שלהם. כל משבצת היא פגישה.\n\nוחשוב לי להגיד: זה לא אומר שאצלכם פגישה תעלה 45 ₪, וזה לא אומר שתקבלו פגישה תוך יום וחצי.\n\nאבל אלה התוצאות שלהם, ומגיע לכם לדעת אותן.',click:'אחרי "לדעת אותן".'},
+{L:'MAP',h:'ששת השלבים',steps:['הבידול','ההצעה בחינם','עמוד נחיתה וסינון','הקריאייטיב','הקהל והקמפיין','מדידה'],role:'המפה. כדי שיידעו איפה הם בכל רגע.',beats:['שישה שלבים.','בכל שלב: מה צריך, למה, ומה עשיתי.'],
+ say:'וזה כל התהליך. שישה שלבים.\n\nהבידול. ההצעה בחינם. עמוד נחיתה עם סינון. הקריאייטיב. הקהל והקמפיין. ומדידה.\n\nבכל שלב אני אראה לכם מה צריך, למה עשיתי את מה שעשיתי, ומה עשיתי בפועל.',click:'אחרי "מה עשיתי בפועל".'},
+{L:'T',label:'שלב 1 מתוך 6',h:'הבידול',b:['במה אתם הכי טובים?','לאיזה סוג עסק כבר הבאתם תוצאה?','מה הלקוח מקבל אצלכם, ולא אצל אחרים?'],role:'שלב 1: השאלות.',beats:['שלוש שאלות.','[להוסיף את התשובות של הסוכנות כדוגמה]'],
+ say:'שלב ראשון: הבידול.\n\nלפני מודעה, לפני עמוד, צריך לדעת מה אתם מוכרים ולמי.\n\nשלוש שאלות. במה אתם הכי טובים? לאיזה סוג עסק כבר הבאתם תוצאה? ומה הלקוח מקבל אצלכם, ולא אצל אחרים?\n\n[להרחיב לפי מה שעשית עם הסוכנות.]',click:'אחרי השאלה השלישית.'},
+{L:'B',label:'שלב 1 מתוך 6',h:'הבידול של הסוכנות',b:['[הבידול שבחרתם]','טעות נפוצה: "אני עושה הכל".','טעות נפוצה: מחיר זול כבידול.'],vis:'צילום מסך: הבידול של הסוכנות',role:'שלב 1: דוגמה וטעויות.',beats:['הבידול של הסוכנות.','שתי טעויות.'],
+ say:'ככה זה נראה אצל הסוכנות.\n\n[לתאר את הבידול שבחרתם ולמה.]\n\nושתי טעויות שאני רואה כל הזמן. הראשונה: "אני עושה הכל". מי שעושה הכל, לא נבחר לשום דבר. השנייה: מחיר זול. זה לא בידול, זו הנחה.',click:'אחרי "זו הנחה".'},
+{L:'T',label:'שלב 2 מתוך 6',h:'ההצעה בחינם',b:['למה פגישת ייעוץ: הכי קל להגיד לה כן.','הצעה חזקה: תוצאה ספציפית, לקהל ספציפי.','בפגישה אתם מאבחנים. לא מוכרים.'],role:'שלב 2: למה פגישת ייעוץ.',beats:['קל להגיד כן.','ספציפי.','מאבחנים, לא מוכרים.'],
+ say:'שלב שני: ההצעה בחינם.\n\nלמה פגישת ייעוץ? כי זה הדבר שהכי קל להגיד לו כן. בלי סיכון, בלי התחייבות.\n\nהצעה חזקה מבטיחה תוצאה ספציפית, לקהל ספציפי.\n\nובפגישה עצמה אתם לא מוכרים. אתם מאבחנים. מי שמאבחן טוב, לא צריך למכור.',click:'אחרי "לא צריך למכור".'},
+{L:'B',label:'שלב 2 מתוך 6',h:'ההצעה של הסוכנות',b:['[ההצעה כפי שנוסחה]','[למה דווקא היא]'],vis:'צילום מסך: ההצעה כפי שהופיעה במודעה',role:'שלב 2: דוגמה.',beats:['ההצעה של הסוכנות.','למה היא עבדה.'],
+ say:'וזו ההצעה של הסוכנות.\n\n[להקריא את ההצעה, ולהסביר למה בחרתם בה.]',click:'אחרי ההסבר.'},
+{L:'B',label:'שלב 3 מתוך 6',h:'עמוד הנחיתה',b:['כותרת עם ההבטחה.','למי זה מתאים.','מה קורה בפגישה.','ומי אתם.'],vis:'צילום מסך: עמוד הנחיתה של הסוכנות',role:'שלב 3: מבנה העמוד.',beats:['ארבעה חלקים.','לעבור על העמוד בצילום המסך.'],
+ say:'שלב שלישי: עמוד הנחיתה.\n\nהעמוד הזה פשוט. כותרת עם ההבטחה. למי זה מתאים. מה קורה בפגישה. ומי אתם.\n\n[לעבור על העמוד בצילום המסך.]',click:'אחרי המעבר על העמוד.'},
+{L:'B',label:'שלב 3 מתוך 6',h:'קלנדלי וסינון',b:['איזה עסק יש לכם?','[שאלת סינון שנייה]','[שאלת סינון שלישית]'],vis:'צילום מסך: שאלות הסינון בקלנדלי',role:'שלב 3: למה מסננים.',beats:['שאלות הסינון.','כל פגישה מבוזבזת עולה זמן.'],
+ say:'ועכשיו החלק שהכי הרבה אנשים מדלגים עליו: סינון.\n\nלפני שמישהו קובע פגישה, הוא עונה על כמה שאלות.\n\n[לעבור על השאלות.]\n\nלמה? כי כל פגישה עם מי שלא רלוונטי עולה לכם שעה. הסינון הוא מה שהפך את זה ל־45 ₪ לפגישה עם לקוח אמיתי.',click:'אחרי "לקוח אמיתי".'},
+{L:'T',label:'שלב 4 מתוך 6',h:'תכנון הקריאייטיב',b:['זווית אחת לכל מודעה.','בעברית. זה הסינון הראשון.','מה עוצר את הגלילה: משהו שהם מזהים מהחיים שלהם.'],role:'שלב 4: זוויות.',beats:['זווית אחת.','העברית מסננת לבד.','לזהות את עצמם.'],
+ say:'שלב רביעי: הקריאייטיב.\n\nכל מודעה עם זווית אחת. לא שלוש.\n\nוהמודעה בעברית. זה הסינון הראשון. מי שלא קורא עברית, פשוט ממשיך לגלול.\n\nמה עוצר את הגלילה? משהו שהם מזהים מהחיים שלהם.',click:'אחרי "מהחיים שלהם".'},
+{L:'B',label:'שלב 4 מתוך 6',h:'עיצוב',b:['מסר אחד, טקסט גדול.','ניגודיות חזקה.','פונט עברי קריא.'],vis:'דוגמאות למודעות של הסוכנות',role:'שלב 4: דגשי עיצוב.',beats:['מסר אחד.','ניגודיות.','פונט.'],
+ say:'כמה דגשים בעיצוב.\n\nמסר אחד, וטקסט גדול. אנשים רואים את המודעה בטלפון, לשנייה.\n\nניגודיות חזקה.\n\nופונט עברי קריא. [להראות דוגמאות.]',click:'אחרי הדוגמאות.'},
+{L:'F',label:'שלב 4 מתוך 6',h:'עם היגספילד, ובלי',cols:[['עם היגספילד',['[מה יצא]','[כמה זמן לקח]']],['בלי',['[הכלי החינמי]','[מה יצא]']]],role:'שלב 4: שתי דרכים.',beats:['שתי הדרכים.','לא חייבים לשלם על עוד כלי.'],
+ say:'ואפשר לעשות את זה בשתי דרכים.\n\nעם היגספילד. [להראות תוצרים.]\n\nובלי, אם לא רוצים לשלם על עוד כלי. [להראות תוצרים.]',click:'אחרי שתי הדוגמאות.'},
+{L:'T',label:'שלב 5 מתוך 6',h:'הקהל והקמפיין',b:['מיקום: ארצות הברית.','המודעה בעברית עושה את הסינון.','תקציב בדיקה: 500 ₪, כ־35 ₪ ליום לשבועיים.'],role:'שלב 5: הגדרות ותקציב.',beats:['ארצות הברית.','העברית מסננת.','500 ₪ לבדיקה.'],
+ say:'שלב חמישי: הקהל והקמפיין.\n\nמיקום: ארצות הברית. אין סינון של "ישראלים" במטא, וזה בסדר. המודעה בעברית עושה את העבודה.\n\nותקציב: תכננו 500 ₪ להתחלה. בערך 35 ₪ ליום, לשבועיים. זה מספיק כדי לראות אם ההצעה עובדת, לפני שמגדילים.',click:'אחרי "לפני שמגדילים".'},
+{L:'T',label:'שלב 5 מתוך 6',h:'קלוד מול מטא',b:['קלוד מעלה ומנהל את הקמפיין בשבילכם.','מטא פותחים את החיבור בהדרגה.','החשבון שלכם לא פתוח? יש דרך ידנית, והיא עובדת.'],role:'שלב 5: החיבור, והמכשול.',beats:['מה זה חוסך.','לא כל החשבונות פתוחים.','לא אשמתכם, ויש דרך ידנית.'],
+ say:'ועכשיו קלוד. כשהוא מחובר לחשבון המודעות, הוא מעלה ומנהל את הקמפיין בשבילכם.\n\nאבל חשוב שתדעו: מטא פותחים את החיבור הזה בהדרגה, חשבון אחרי חשבון. חלק מכם יגלו שהחשבון שלהם עוד לא פתוח.\n\nזה לא משהו שעשיתם לא נכון. ובינתיים יש דרך ידנית, והיא עובדת לא פחות טוב.',click:'אחרי "לא פחות טוב".'},
+{L:'T',label:'שלב 6 מתוך 6',h:'מדידה',b:['כמה עולה ליד.','כמה קבעו פגישה.','כמה הגיעו לפגישה.'],role:'שלב 6: מה בודקים.',beats:['שלושה מספרים.','מתי מחליפים מודעה.','מתי מגדילים.'],
+ say:'שלב אחרון: מדידה.\n\nבימים הראשונים בודקים שלושה מספרים. כמה עולה ליד. כמה קבעו פגישה. וכמה באמת הגיעו.\n\n[מתי מחליפים מודעה, ומתי מגדילים תקציב, לפי מה שעשית עם הסוכנות.]',click:'אחרי ההסבר.'},
+{L:'A',h:'שישה שלבים. קמפיין אחד בעברית.',sub:'וזה כל התהליך.',role:'סיכום. האמונה, פעם רביעית.',beats:['זה הכל.','קמפיין אחד בעברית.'],
+ say:'וזה כל התהליך.\n\nשישה שלבים. קמפיין אחד בעברית. וישראלים שכבר כבשו את אמריקה.',click:'אחרי "כבשו את אמריקה".'},
+{L:'A',h:'לכו תעשו.',sub:'יש לכם את כל מה שאתם צריכים לדעת. תוך יומיים אתם יכולים להיות עם קמפיין באוויר, ופגישות יתחילו להיכנס ליומן.',role:'סגירה עדינה. לשחרר אותם לעשות.',beats:['יש לכם הכל.','זה לא מורכב.','יומיים.'],
+ say:'יש לכם את כל מה שאתם צריכים לדעת. זה לא מורכב.\n\nלכו תעשו. תוך יומיים אתם יכולים להיות עם קמפיין באוויר, ופגישות יתחילו להיכנס ליומן.',click:'אחרי "להיכנס ליומן".'},
+{L:'A',h:'יש אנשים שייקחו את זה בידיים.',frags:['הרוב לא.'],sub2:'הידע שקיבלתם כאן ייכנס למגירה. וחבל.',role:'הפער בין לדעת לעשות.',beats:['יש מי שיעשה.','לחיצה: הרוב לא.','המגירה.'],
+ say:'יש אנשים שייקחו את זה בידיים, וביום ראשון יהיו עם קמפיין באוויר.\n\n[לחיצה]\n\nהרוב לא.\n\nהידע שקיבלתם כאן ייכנס למגירה. וחבל.',click:'לחיצה ראשונה: "הרוב לא". לחיצה שנייה: המגירה. אחר כך הבא.'},
+{L:'OFFER',h:'סדנת ההמשך',sub:'למי שצריך את הדחיפה, ולמי שיודע שהוא פשוט לא יעשה את זה לבד.',items:['שמונה מפגשים: ארבעה מוקלטים וארבעה בלייב.','יוצאים עם קמפיין באוויר, כולל הכל.','ההקמה הטכנית: חשבון, פיקסל, המרה וחיבור להיגספילד.','קבוצת וואטסאפ להתייעצות.','מתחילים ביום ראשון.'],role:'ההצעה. שקף אחד, בלי לחץ.',beats:['למי שצריך דחיפה.','שמונה מפגשים.','2,870 ₪, ואחרי זיכוי 1,897 ₪.','"מעניין אתכם?"'],
+ say:'אז למי שצריך את הדחיפה, ולמי שיודע שהוא פשוט לא יעשה את זה לבד, הכנתי סדנת המשך.\n\nשמונה מפגשים: ארבעה מוקלטים, וארבעה בלייב. יוצאים ממנה עם קמפיין באוויר, כולל הכל. גם ההקמה הטכנית שלא נכנסה להיום: חשבון, פיקסל, המרה וחיבור להיגספילד. ויש קבוצת וואטסאפ להתייעצות.\n\nמתחילים ביום ראשון.\n\nהמחיר הוא 2,870 ₪. מי שהיה כאן היום מקבל זיכוי על מה ששילם, ומשלם 1,897 ₪.\n\nמעניין אתכם? הלינק בצ\'אט.',click:'אחרי "הלינק בצ\'אט". לשים את הלינק בצ\'אט.'},
+{L:'A',h:'השאלות ששואלים אותי הכי הרבה',sub:'אספתי אותן, ואני עונה עליהן עכשיו.',role:'מעבר לשאלות ותשובות.',beats:['אספתי את השאלות הנפוצות.','הלינק נשאר בפינה.'],
+ say:'אספתי את השאלות ששואלים אותי הכי הרבה על זה, ואני עונה עליהן עכשיו.',click:'אחרי המשפט.',corner:true}
+];
+const QS=[
+['התאמה','זה מתאים גם למי שעוד לא עבד אף פעם עם לקוח מחו״ל?'],
+['התאמה','צריך אנגלית טובה?'],
+['התאמה','זה מתאים רק לבילדרים, או גם לעיצוב, שיווק ופיתוח?'],
+['התאמה','מה אם אין לי עדיין תיק עבודות או לקוחות להראות?'],
+['התאמה','צריך חברה בארצות הברית כדי לקבל תשלום בדולרים?'],
+['התאמה','איך גובים בפועל תשלום מלקוח בארצות הברית?','זהירות: יש השלכות מס. להמליץ על שיחה עם רואה חשבון.'],
+['הקהל','איך המודעה מגיעה לישראלים, אם אין סינון כזה במטא?'],
+['הקהל','למה לא לפנות ישר לאמריקאים?'],
+['הקהל','מה עם ישראלים שלא רוצים לעבוד עם ישראלים?'],
+['הקהל','כדאי להתמקד בערים מסוימות?'],
+['הקהל','איך מתמודדים עם הפרשי השעות?'],
+['ההצעה','מה אם אני לא יודע מה הבידול שלי?'],
+['ההצעה','פגישת ייעוץ בחינם לא מורידה מהערך שלי?'],
+['ההצעה','כמה זמן צריכה להיות הפגישה, ומה עושים בה?'],
+['ההצעה','כמה לגבות מלקוח בארצות הברית?'],
+['עמוד והפגישות','חייבים עמוד נחיתה, או אפשר לשלוח ישר לקלנדלי או לוואטסאפ?'],
+['עמוד והפגישות','אילו שאלות סינון לשים?'],
+['עמוד והפגישות','מה עושים עם מי שקובע פגישה ולא מגיע?'],
+['קריאייטיב','תמונה או סרטון?'],
+['קריאייטיב','אני חייב להופיע בעצמי במודעה?'],
+['קריאייטיב','כמה מודעות להעלות בהתחלה?'],
+['קמפיין ותקציב','כמה תקציב צריך להתחלה?'],
+['קמפיין ותקציב','תוך כמה זמן מגיעה פגישה ראשונה?','לחזור על הסייג: אצל הסוכנות יום וחצי, אין הבטחה.'],
+['קמפיין ותקציב','מה אם עבר שבוע ואין פגישות?'],
+['קמפיין ותקציב','מה אם החשבון שלי לא מתחבר לקלוד?'],
+['קמפיין ותקציב','חשבון המודעות שלי בשקלים. זה משנה?'],
+['קמפיין ותקציב','מה אם חשבון המודעות שלי ייחסם?','להכין תשובה. זה פחד אמיתי.'],
+['אחרי הפגישה','איך סוגרים לקוח בפגישה הראשונה?'],
+['אחרי הפגישה','מה עושים אחרי שנסגר לקוח, כדי שיישאר לאורך זמן?'],
+['סדנת ההמשך','מה ההבדל בין מה שראינו היום לסדנת ההמשך?'],
+['סדנת ההמשך','מה אם אני לא יכול להגיע ללייבים?'],
+['סדנת ההמשך','כמה זמן בשבוע זה דורש?']
+];
+QS.forEach((q,i)=>S.push({L:'Q',label:q[0],h:q[1],corner:true,role:'שאלה '+(i+1)+' מתוך '+QS.length+': '+q[0],beats:q[2]?[q[2]]:['לענות בקצרה.'],say:'השאלה הבאה: '+q[1],click:'אחרי התשובה.'}));
+
+/* ================= RENDER ================= */
+const frame=document.getElementById('frame');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const bullets=a=>'<ul class="b">'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+const visBox=(s)=>s.img?'<div class="vis real"><img src="'+s.img+'" alt="'+esc(s.h)+'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
+function render(s){
+  let inner='',cls='slide';
+  const hcls=s.size==='xl'?'h-xl':'h-l';
+  const lab=s.label?'<p class="label">'+esc(s.label)+'</p>':'';
+  switch(s.L){
+    case 'A':cls+=' center';
+      inner=lab+'<h1 class="'+hcls+'">'+esc(s.h)+'</h1>'+(s.sub?'<p class="sub">'+esc(s.sub)+'</p>':'')
+        +(s.frags||[]).map(f=>'<h1 class="h-l frag" style="margin-top:36px">'+esc(f)+'</h1>').join('')
+        +(s.sub2?'<p class="sub frag">'+esc(s.sub2)+'</p>':'');break;
+    case 'T':inner=lab+'<h1 class="h-l">'+esc(s.h)+'</h1>'+bullets(s.b);break;
+    case 'B':cls+=' split';inner='<div class="txt">'+lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+bullets(s.b)+'</div>'+visBox(s);break;
+    case 'C':cls+=' lc';inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+visBox(s)+(s.cap?'<p class="cap">'+esc(s.cap)+'</p>':'');break;
+    case 'F':cls+=' split';inner='<div class="txt" style="flex:1 1 100%">'+lab+'<h1 class="h-m">'+esc(s.h)+'</h1><div style="display:flex;gap:60px;margin-top:20px">'+s.cols.map(c=>'<div style="flex:1;min-width:0"><p class="label" style="margin:20px 0 0;font-size:34px">'+esc(c[0])+'</p>'+bullets(c[1])+'</div>').join('')+'</div></div>';break;
+    case 'BIG3':cls+=' big3';inner='<h1 class="h-m">'+esc(s.h)+'</h1>'+s.cells.map(c=>'<div class="cell"><div class="bign">'+esc(c[0])+'</div><p class="bigc">'+esc(c[1])+'</p></div>').join('')+(s.cap?'<p class="cap" style="margin-top:50px">'+esc(s.cap)+'</p>':'');break;
+    case 'STATS':inner='<h1 class="h-m">'+esc(s.h)+'</h1><div class="stats">'+s.stats.map(x=>'<div class="stat'+(x[2]?' lit':'')+'"><div class="n">'+esc(x[0])+'</div><div class="t">'+esc(x[1])+'</div></div>').join('')+'</div>';break;
+    case 'CALC':inner='<h1 class="h-m">'+esc(s.h)+'</h1><ul class="calc">'+s.calc.map((x,i)=>'<li'+(i>1?' class="frag"':'')+'>'+x+'</li>').join('')+'<li class="res frag">'+esc(s.res)+'</li></ul>';break;
+    case 'MAP':inner='<h1 class="h-l" style="text-align:center">'+esc(s.h)+'</h1><ol class="map">'+s.steps.map((t,i)=>'<li><span class="rn">'+(i+1)+'</span><span class="rt">'+esc(t)+'</span></li>').join('')+'</ol>';break;
+    case 'OFFER':cls+=' offer';inner='<div class="ol"><h1 class="h-m">'+esc(s.h)+'</h1><p class="sub" style="font-size:32px;margin-top:20px">'+esc(s.sub)+'</p>'+bullets(s.items)+'</div><div class="or"><div class="strike">2,870 ₪</div><div class="price">1,897 ₪</div><div class="pnote">אחרי זיכוי של 147 ₪ למשתתפי ההדרכה</div><div class="pnote">'+esc(LINK)+'</div><div class="ask2">מעניין אתכם?</div></div>';break;
+    case 'Q':cls+=' center q';inner=lab+'<h1>'+esc(s.h)+'</h1>';break;
+  }
+  if(s.foot)inner+='<p class="foot">'+esc(s.foot)+'</p>';
+  if(s.corner)inner+='<div class="corner">סדנת ההמשך: '+esc(LINK)+'</div>';
+  if(s.ask)inner+='<div class="askchip">'+esc(s.ask)+'</div>';
+  const el=document.createElement('section');el.className=cls;el.innerHTML=inner;return el;
+}
+const els=S.map(render);els.forEach(e=>frame.appendChild(e));
+
+/* ================= STATE + SYNC ================= */
+const KEY='usd-deck';
+const isStage=location.hash==='#stage';
+if(isStage)document.body.classList.add('stage');
+let cur=0,step=0;
+try{const st=JSON.parse(localStorage.getItem(KEY)||'{}');if(Number.isInteger(st.cur)&&st.cur<S.length){cur=st.cur;step=st.step||0}}catch(e){}
+let chan=null;try{chan=new BroadcastChannel(KEY)}catch(e){}
+const fragsOf=i=>els[i].querySelectorAll('.frag');
+function apply(from){
+  els.forEach((e,i)=>{e.classList.toggle('on',i===cur);e.classList.toggle('off',i<cur)});
+  const pi=document.querySelector('#prog i');if(pi)pi.style.width=((cur+1)/S.length*100)+'%';
+  fragsOf(cur).forEach((f,i)=>f.classList.toggle('show',i<step));
+  if(!isStage){
+    const s=S[cur];
+    document.getElementById('counter').textContent=(cur+1)+' / '+S.length;
+    document.getElementById('sayTxt').textContent=s.say+(s.note?'\n\n'+s.note:'');
+    document.getElementById('roleTxt').textContent=s.role||'';
+    document.getElementById('beatsUl').innerHTML=(s.beats||[]).map(b=>'<li>'+esc(b)+'</li>').join('');
+    document.getElementById('clickTxt').textContent=s.click||'';
+    document.getElementById('askBox').hidden=!s.ask;
+    document.getElementById('askTxt').textContent=s.ask||'';
+    const nx=S[cur+1];document.getElementById('nextTxt').textContent=nx?('← '+nx.h):'סוף המצגת';
+  }
+  if(from!=='remote'){
+    const st={cur,step,t:Date.now()};
+    try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}
+    if(chan)chan.postMessage(st);
+  }
+}
+function next(){const n=fragsOf(cur).length;if(step<n){step++}else if(cur<S.length-1){cur++;step=0}apply()}
+function prev(){if(step>0){step--}else if(cur>0){cur--;step=fragsOf(cur).length}apply()}
+document.addEventListener('keydown',e=>{
+  if(e.target&&e.target.id==='sayToggle'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggleSay();return}
+  if(['ArrowLeft','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();next()}
+  else if(['ArrowRight','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev()}
+  else if(e.key==='Home'){cur=0;step=0;apply()}
+  else if(e.key==='End'){cur=S.length-1;step=0;apply()}
+  else if(e.key==='Escape'&&!isStage&&document.body.classList.contains('stage')){document.body.classList.remove('stage');fit()}
+  else if(e.key==='f'||e.key==='F'){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(err){}}
+});
+frame.addEventListener('click',e=>{const r=frame.getBoundingClientRect();(e.clientX-r.left)/r.width>0.75?prev():next()});
+if(chan)chan.onmessage=ev=>{const st=ev.data;if(!st)return;cur=st.cur;step=st.step||0;apply('remote')};
+window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const st=JSON.parse(ev.newValue);cur=st.cur;step=st.step||0;apply('remote')}catch(e){}});
+
+/* ================= SCALE ================= */
+function fit(){const w=document.getElementById('stageWrap');const pad=document.body.classList.contains('stage')?0:40;const sc=Math.min((w.clientWidth-pad)/1600,(w.clientHeight-pad)/900);frame.style.transform='scale('+Math.max(sc,.05)+')'}
+window.addEventListener('resize',fit);fit();
+
+/* ================= PRESENTER EXTRAS ================= */
+function toggleSay(){const t=document.getElementById('sayTxt');t.hidden=!t.hidden;document.getElementById('sayToggle').textContent=t.hidden?'תסריט מלא ◂':'תסריט מלא ▾'}
+if(!isStage){
+  document.getElementById('sayToggle').onclick=toggleSay;
+  document.getElementById('prev').onclick=prev;
+  document.getElementById('next').onclick=next;
+  document.getElementById('stageHere').onclick=()=>{document.body.classList.add('stage');fit();try{document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+  document.getElementById('openStage').onclick=()=>{const u=new URL(location.href);u.hash='stage';const w=window.open(u.toString(),'usd-stage');if(!w){const b=document.getElementById('openStage');b.textContent='בתוך claude.ai לשונית שנייה חסומה. השתמשו במצב במה בחלון הזה';}};
+  let t0=Date.now();const el=document.getElementById('elapsed');
+  document.getElementById('resetT').onclick=()=>{t0=Date.now()};
+  setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
+}
+document.fonts&&document.fonts.ready.then(fit);
+apply();
+</script>
