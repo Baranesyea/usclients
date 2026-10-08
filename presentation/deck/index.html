@@ -76,6 +76,8 @@ ul.b li::before{content:"";position:absolute;right:0;top:36px;width:18px;height:
 .vis.real.portrait img{object-position:center 45%}
 .split .vis.real.copyimg{flex:0 0 480px;height:754px;padding:0;background:#fff}
 .vis.real.copyimg img{object-fit:contain;width:100%;height:100%}
+.split .vis.real.formimg{flex:0 0 780px;height:430px;padding:0;background:transparent}
+.vis.real.formimg img{object-fit:contain;width:100%;height:100%}
 .split .vis.real.duo{flex:0 0 auto;height:auto;display:flex;gap:20px;padding:0;background:transparent;box-shadow:none;justify-content:center;align-items:center;overflow:visible}
 .vis.real.duo img{width:400px;height:501px;flex:0 0 400px;object-fit:cover;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.18)}
 .split .vis.real.tallimg{flex:0 0 560px;height:700px;background:#000;padding:0}
@@ -235,8 +237,8 @@ const S=[
  say:'וככה זה נראה אצל הסוכנות.\n\nההצעה הייתה פגישת התייעלות עסקית עם בינה מלאכותית. 45 דקות, אונליין, ללא עלות. ויוצאים ממנה עם תוכנית פעולה: איפה הבינה המלאכותית תחסוך לעסק זמן, כסף וכוח אדם.\n\n[לחיצה]\n\nלפני הפגישה בוחנים את העסק: העמודים, האתר והמודעות. מגיעים לפגישה עם דוח, במתנה, ועוברים עליו יחד.\n\nזו בדיוק הדרך השנייה שדיברנו עליה: מאבחנים לפני, ומגיעים עם משהו ביד.',click:'לחיצה אחת חושפת איך זה עובד.'},
 {L:'B',label:'שלב 3 מתוך 6',h:'עמוד הנחיתה',b:['כותרת עם ההבטחה, ולמי זה.','"ללא עלות", בולט.','מה מקבלים בפגישה.','למי זה מתאים.','כפתור אחד: קבעו פגישה.'],img:'img/landing.png',tall:true,vis:'צילום מסך: עמוד הנחיתה של הסוכנות',role:'שלב 3: מבנה העמוד.',beats:['ארבעה חלקים.','לעבור על העמוד בצילום המסך.'],
  say:'שלב שלישי: עמוד הנחיתה.\n\nזה העמוד של הסוכנות, והוא פשוט. למעלה: למי זה, וכותרת עם ההבטחה. "ללא עלות", בולט. משפט אחד שמסביר עם מה יוצאים.\n\nאחר כך: מה מקבלים בפגישה, חמש שורות. ולמי זה מתאים.\n\nוכפתור אחד: קבעו לי פגישה ללא עלות. בלי תפריט, בלי הסחות.',click:'אחרי המעבר על העמוד.'},
-{L:'B',label:'שלב 3 מתוך 6',h:'קלנדלי וסינון',b:['איזה עסק יש לכם?','[שאלת סינון שנייה]','[שאלת סינון שלישית]'],vis:'צילום מסך: שאלות הסינון בקלנדלי',role:'שלב 3: למה מסננים.',beats:['שאלות הסינון.','כל פגישה מבוזבזת עולה זמן.'],
- say:'ועכשיו החלק שהכי הרבה אנשים מדלגים עליו: סינון.\n\nלפני שמישהו קובע פגישה, הוא עונה על כמה שאלות.\n\n[לעבור על השאלות.]\n\nלמה? כי כל פגישה עם מי שלא רלוונטי עולה לכם שעה. הסינון הוא מה שהפך את זה ל־45 ₪ לפגישה עם לקוח אמיתי.',click:'אחרי "לקוח אמיתי".'},
+{L:'B',label:'שלב 3 מתוך 6',h:'קלנדלי וסינון',b:['כמה עובדים יש בעסק?','יש לכם כרגע קמפיין פרסום פעיל?','מה הכי גוזל לכם זמן בעסק היום?'],img:'img/calendly-form.png',form:true,vis:'טופס קביעת הפגישה',role:'שלב 3: למה מסננים.',beats:['שאלות הסינון.','כל פגישה מבוזבזת עולה זמן.'],
+ say:'ועכשיו החלק שהכי הרבה אנשים מדלגים עליו: סינון.\n\nלפני שמישהו קובע פגישה, הוא עונה על כמה שאלות.\n\nכמה עובדים יש בעסק? מי שעובד לבד, כנראה לא יקנה ריטיינר.\n\nיש לכם כרגע קמפיין פרסום פעיל? זה אומר שהם כבר משקיעים בצמיחה.\n\nומה הכי גוזל לכם זמן בעסק היום? את התשובה הזאת לוקחים איתכם לפגישה. ככה אתם מגיעים מוכנים.\n\nלמה? כי כל פגישה עם מי שלא רלוונטי עולה לכם שעה. הסינון הוא מה שהפך את זה ל־45 ₪ לפגישה עם לקוח אמיתי.',click:'אחרי "לקוח אמיתי".'},
 {L:'T',label:'שלב 4 מתוך 6',h:'תכנון הקריאייטיב',b:['זווית אחת לכל מודעה.','בעברית. זה הסינון הראשון.','מה עוצר את הגלילה: משהו שהם מזהים מהחיים שלהם.'],role:'שלב 4: זוויות.',beats:['זווית אחת.','העברית מסננת לבד.','לזהות את עצמם.'],
  say:'שלב רביעי: הקריאייטיב.\n\nכל מודעה עם זווית אחת. לא שלוש.\n\nוהמודעה בעברית. זה הסינון הראשון. מי שלא קורא עברית, פשוט ממשיך לגלול.\n\nמה עוצר את הגלילה? משהו שהם מזהים מהחיים שלהם.',click:'אחרי "מהחיים שלהם".'},
 {L:'B',label:'שלב 4 מתוך 6',h:'עיצוב',b:['מסר אחד, טקסט גדול.','ניגודיות חזקה.','פונט עברי קריא.','מספר אחד שעוצר את הגלילה.'],imgs:['img/ad-5.jpg','img/ad-6.jpg'],vis:'דוגמאות למודעות של הסוכנות',role:'שלב 4: דגשי עיצוב.',beats:['מסר אחד.','ניגודיות.','פונט.'],
@@ -302,7 +304,7 @@ QS.forEach((q,i)=>S.push({L:'Q',label:q[0],h:q[1],corner:true,role:'שאלה '+(
 const frame=document.getElementById('frame');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const bullets=a=>'<ul class="b">'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
-const visBox=(s)=>s.imgs?'<div class="vis real duo">'+s.imgs.map(u=>'<img src="'+u+'" alt="">').join('')+'</div>':s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+(s.portrait?' portrait':'')+(s.tall?' tallimg':'')+(s.copy?' copyimg':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
+const visBox=(s)=>s.imgs?'<div class="vis real duo">'+s.imgs.map(u=>'<img src="'+u+'" alt="">').join('')+'</div>':s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+(s.portrait?' portrait':'')+(s.tall?' tallimg':'')+(s.copy?' copyimg':'')+(s.form?' formimg':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
 function render(s){
   let inner='',cls='slide';
   const hcls=s.size==='xl'?'h-xl':'h-l';
