@@ -72,6 +72,8 @@ ul.b li::before{content:"";position:absolute;right:0;top:36px;width:18px;height:
 .vis b{display:block;color:var(--hi);font-size:22px;margin-bottom:12px}
 .vis.real{border:none;padding:0;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.14)}
 .vis.real img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.split .vis.real.portrait{flex:0 0 480px;height:640px}
+.vis.real.portrait img{object-position:center 45%}
 .vis.real.contain{padding:24px;height:auto!important;max-height:600px}
 .lc .vis.real.contain{width:1340px}
 .vis.real.contain img{object-fit:contain;object-position:center;height:auto;max-height:552px}
@@ -156,7 +158,7 @@ const S=[
  say:'עד סוף ההדרכה תראו את כל התהליך שבניתי לסוכנות ישראלית.\n\nתהליך שהביא לה פגישה ראשונה עם לקוח בארצות הברית, אחרי יום וחצי.\n\nואני מתכוון לכל התהליך. מה צריך, למה עשיתי כל דבר, ומה עשיתי בפועל.',click:'אחרי "מה עשיתי בפועל".'},
 {L:'T',h:'תיאום ציפיות',b:['הדרכה פרקטית: מה עושים, ואיך עושים.','לא עובדים יחד על המחשבים. יש לנו שעה וחצי.','מי שירצה עזרה בביצוע, נדבר על זה בסוף.'],role:'תיאום ציפיות. להוריד התנגדות מראש.',beats:['הרבה שאלו אותי.','פרקטי מאוד, אבל לא עבודה משותפת על מחשבים.','מי שצריך עזרה, יש אפשרות. בסוף.'],
  say:'הרבה שאלו אותי לפני ההדרכה, וחשוב לי לעשות תיאום ציפיות.\n\nההדרכה הזאת פרקטית מאוד. תצאו ממנה עם ידע והבנה של מה לעשות ואיך לעשות.\n\nאבל זו לא סדנה שבה מתחלקים לקבוצות וכולם פותחים מחשב ועושים יחד. יש לנו שעה וחצי.\n\nמי שיחליט בסוף שהוא צריך עזרה לעשות את זה, מכל סיבה שהיא, יש אפשרות. נדבר על זה בסוף.',click:'אחרי "נדבר על זה בסוף".'},
-{L:'B',label:'מי אני',h:'ערן בראונשטיין',b:['מנהל מוצר.','חוקר ומרצה בעולמות הבינה המלאכותית.','יועץ לחברות בנושאי התייעלות עסקית וצמיחה.'],img:'img/eran.jpg',vis:'התמונה שלך',role:'מי אני. אמון.',beats:['ערן בראונשטיין.','מנהל מוצר, חוקר ומרצה בבינה מלאכותית.','יועץ לחברות: התייעלות וצמיחה.'],
+{L:'B',label:'מי אני',h:'ערן בראונשטיין',b:['מנהל מוצר.','חוקר ומרצה בעולמות הבינה המלאכותית.','יועץ לחברות בנושאי התייעלות עסקית וצמיחה.'],img:'img/eran.jpg',portrait:true,vis:'התמונה שלך',role:'מי אני. אמון.',beats:['ערן בראונשטיין.','מנהל מוצר, חוקר ומרצה בבינה מלאכותית.','יועץ לחברות: התייעלות וצמיחה.'],
  say:'רגע, מי אני.\n\nקוראים לי ערן בראונשטיין. אני מנהל מוצר, חוקר ומרצה בעולמות הבינה המלאכותית, ויועץ לחברות בנושאי התייעלות עסקית וצמיחה.',click:'אחרי "וצמיחה".'},
 {L:'T',h:'השוק בישראל',b:['חגים, ועוד חגים.','מלחמה, מילואים, אזעקות.','לקוחות שמקפיאים פרויקטים ברגע האחרון.'],role:'הבעיה דחופה עכשיו.',beats:['חגים.','מלחמה ומילואים.','לקוחות שמקפיאים.'],
  say:'בואו נדבר רגע על השוק שאנחנו עובדים בו.\n\nחגים, ועוד חגים. מלחמה, מילואים, אזעקות.\n\nולקוחות שאומרים "בואו נדבר אחרי החגים", או מקפיאים פרויקט ברגע האחרון.\n\nכל אחד כאן מכיר את זה מקרוב.',click:'אחרי "מכיר את זה מקרוב".'},
@@ -270,7 +272,7 @@ QS.forEach((q,i)=>S.push({L:'Q',label:q[0],h:q[1],corner:true,role:'שאלה '+(
 const frame=document.getElementById('frame');
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const bullets=a=>'<ul class="b">'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
-const visBox=(s)=>s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
+const visBox=(s)=>s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+(s.portrait?' portrait':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
 function render(s){
   let inner='',cls='slide';
   const hcls=s.size==='xl'?'h-xl':'h-l';
