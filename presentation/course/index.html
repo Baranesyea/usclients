@@ -1,0 +1,341 @@
+<title>סדנת ההמשך</title>
+<style>
+/* Layout: presenter view (16:9 stage + notes rail) or full stage; slides on a 1600x900 canvas, scaled to fit. RTL throughout. */
+@font-face{font-family:"FbOptimum";src:url("fonts/FbOptimum-Light.otf") format("opentype");font-weight:300;font-display:block}
+@font-face{font-family:"FbOptimum";src:url("fonts/FbOptimum-Regular.otf") format("opentype");font-weight:400;font-display:block}
+@font-face{font-family:"FbOptimum";src:url("fonts/FbOptimum-Black.otf") format("opentype");font-weight:900;font-display:block}
+:root{
+  --ink:#F7F7F4; --paper:#111214; --hi:#0866FF; --mute:#6E716E; --rule:#DCDCD6; --glow:rgba(8,102,255,.28); --ok:#1F9D63; --card:#FFFFFF;
+  --panel:#F3F2EE; --panel-ink:#1A1A17; --panel-soft:#5E5F5B; --panel-rule:#D8D5CC; --alert:#C9372C;
+  --f:"FbOptimum","Arial Hebrew",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--panel:#121416;--panel-ink:#ECEAE4;--panel-soft:#9B9C99;--panel-rule:#2A2D30;color-scheme:dark}}
+:root[data-theme="dark"]{--panel:#121416;--panel-ink:#ECEAE4;--panel-soft:#9B9C99;--panel-rule:#2A2D30;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--panel);color:var(--panel-ink);font-family:var(--f);overflow:hidden}
+
+#app{direction:rtl;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);grid-template-rows:1fr auto;height:100%}
+#stageWrap{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:1.2rem;min-width:0;min-height:0;background:var(--panel)}
+#notes{border-inline-start:1px solid var(--panel-rule);padding:1.4rem 1.6rem;overflow:auto;min-height:0;display:flex;flex-direction:column;gap:1.1rem;min-width:0}
+#bar{grid-column:1/-1;border-top:1px solid var(--panel-rule);display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;padding:.6rem 1rem;font-weight:900;font-size:.9rem}
+#bar button{font:inherit;padding:.45rem .8rem;border:1px solid var(--panel-rule);background:transparent;color:var(--panel-ink);border-radius:8px;cursor:pointer}
+#bar button:hover,#bar button:focus-visible{border-color:var(--panel-ink);outline:none}
+#bar .spacer{flex:1}
+#bar .kbd{color:var(--panel-soft);font-weight:400}
+.nl{font-weight:900;font-size:.78rem;letter-spacing:.06em;color:var(--panel-soft);margin:0 0 .3rem}
+#sayTxt{font-size:1.15rem;line-height:1.7;margin:0;white-space:pre-line}
+#clickTxt{font-size:1rem;line-height:1.5;margin:0}
+#nextTxt{font-weight:900;font-size:1rem;margin:0;color:var(--panel-soft)}
+#meta{font-weight:900;font-size:.9rem;color:var(--panel-soft);display:flex;gap:1rem}
+.big{color:var(--panel-ink);font-size:1.1rem}
+#beatsUl{margin:0;padding-inline-start:1.1rem;font-size:1.2rem;line-height:1.55}
+
+body.stage #app{grid-template-columns:1fr;grid-template-rows:1fr}
+body.stage #notes,body.stage #bar{display:none}
+body.stage #stageWrap{padding:0;background:#ECECE8}
+
+#frame{direction:rtl;position:relative;flex:none;width:1600px;height:900px;transform-origin:center center;background:var(--ink);color:var(--paper);border-radius:14px;overflow:hidden;box-shadow:0 0 0 3px var(--glow),0 0 48px 6px rgba(8,102,255,.18),0 24px 60px rgba(0,0,0,.12);font-family:var(--f)}
+body.stage #frame{border-radius:0;box-shadow:none}
+.slide{position:absolute;inset:0;padding:100px 130px;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateX(-40px);transition:opacity .38s ease,transform .38s ease;pointer-events:none}
+.slide.on{opacity:1;transform:none;pointer-events:auto}
+.slide.off{transform:translateX(40px)}
+.frag{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s}
+.frag.show{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.slide,.frag{transition:none}}
+
+#prog{position:absolute;inset-inline:0;bottom:0;height:6px;background:rgba(8,102,255,.12);z-index:5}
+#prog i{display:block;height:100%;width:0;background:var(--hi);transition:width .4s ease;margin-inline-start:0}
+.label{font-weight:900;font-size:24px;letter-spacing:.04em;color:var(--hi);margin:0 0 22px}
+h1{font-weight:900;line-height:1.18;margin:0;color:var(--hi);text-wrap:balance}
+.h-xl{font-size:130px;max-width:1300px}
+.h-l{font-size:80px;max-width:1300px}
+.h-m{font-size:62px}
+.sub{font-size:38px;font-weight:300;line-height:1.4;color:var(--paper);margin:34px 0 0;max-width:1150px}
+.center{align-items:center;text-align:center}
+.center .sub{margin-inline:auto}
+ul.b{list-style:none;margin:40px 0 0;padding:0;max-width:1250px}
+ul.b li{font-size:40px;font-weight:400;line-height:1.35;padding:18px 48px 18px 0;position:relative;border-top:1px solid var(--rule)}
+ul.b li:first-child{border-top:none}
+ul.b li::before{content:"";position:absolute;right:0;top:36px;width:18px;height:18px;background:var(--hi)}
+.cap{font-size:32px;font-weight:300;color:var(--paper);margin:26px 0 0;text-align:center}
+.foot{position:absolute;bottom:34px;inset-inline:130px;font-size:22px;font-weight:300;color:var(--mute);text-align:center}
+.askchip{position:absolute;inset-inline:0;margin:0 auto;bottom:52px;font-size:32px;font-weight:900;color:var(--hi);padding:14px 26px;border:3px solid var(--hi);border-radius:14px;background:var(--card);width:max-content;max-width:1340px}
+
+.split{flex-direction:row;align-items:center;gap:80px}
+.split .txt{flex:1.05;min-width:0}
+.split .vis{flex:1;height:600px}
+.lc{justify-content:flex-start;padding-top:80px}
+.lc h1{text-align:center;margin:0 auto}
+.lc .vis{margin:36px auto 0;width:1200px;height:560px}
+.vis{border:3px dashed rgba(8,102,255,.35);border-radius:22px;background:var(--card);display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:30px;line-height:1.4;color:var(--paper)}
+.vis b{display:block;color:var(--hi);font-size:22px;margin-bottom:12px}
+.vis.real{border:none;padding:0;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.14)}
+.vis.real img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.split .vis.real.portrait{flex:0 0 480px;height:640px}
+.vis.real.portrait img{object-position:center 45%}
+.split .vis.real.copyimg{flex:0 0 480px;height:754px;padding:0;background:#fff}
+.vis.real.copyimg img{object-fit:contain;width:100%;height:100%}
+.split .vis.real.formimg{flex:0 0 780px;height:430px;padding:0;background:transparent}
+.vis.real.formimg img{object-fit:contain;width:100%;height:100%}
+.split .vis.real.bookimg{flex:0 0 820px;height:522px;padding:0;background:transparent;box-shadow:none}
+.vis.real.bookimg img{object-fit:contain;width:100%;height:100%}
+.trk{flex:0 0 660px;background:var(--paper);color:var(--ink);border-radius:26px;padding:34px 38px;display:flex;flex-direction:column;gap:6px}
+.trk .tl{font-size:22px;font-weight:900;color:#8FB0FF;letter-spacing:.04em;margin-bottom:10px}
+.trk .ti{display:flex;align-items:center;gap:18px;padding:14px 0;border-top:1px solid rgba(255,255,255,.12);font-size:33px;opacity:.35}
+.trk .ti:first-of-type{border-top:none}
+.trk .ti .ck{flex:none;width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900}
+.trk .ti.done{opacity:.75}
+.trk .ti.done .ck{background:#1F9D63;border-color:#1F9D63;color:#fff}
+.trk .ti.cur{opacity:1;font-weight:900}
+.trk .ti.cur .ck{background:var(--hi);border-color:var(--hi);color:#fff}
+.trk .ti .tag{margin-inline-start:auto;font-size:22px;font-weight:900;color:#8FB0FF;white-space:nowrap}
+.trk .ti.you .tag{color:#FFB35C}
+.trk.all .ti{opacity:1}
+.aisub{font-size:36px;font-weight:300;line-height:1.4;margin:28px 0 0;color:var(--paper)}
+.ainote{margin-top:30px;font-size:30px;font-weight:900;color:var(--alert);border:3px solid var(--alert);border-radius:14px;padding:14px 22px;width:max-content;max-width:100%}
+.split .vis.real.duo{flex:0 0 auto;height:auto;display:flex;gap:20px;padding:0;background:transparent;box-shadow:none;justify-content:center;align-items:center;overflow:visible}
+.vis.real.duo img{width:400px;height:501px;flex:0 0 400px;object-fit:cover;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.18)}
+.split .vis.real.tallimg{flex:0 0 560px;height:700px;background:#000;padding:0}
+.vis.real.tallimg img{object-fit:cover;object-position:top center}
+.vis.real.contain{padding:24px;height:auto!important;max-height:600px}
+.lc .vis.real.contain{width:1340px}
+.vis.real.contain img{object-fit:contain;object-position:center;height:auto;max-height:552px}
+
+.big3{flex-direction:row;gap:70px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.big3 h1{width:100%;text-align:center;margin-bottom:30px}
+.big3 .cell{flex:1;min-width:0;text-align:center}
+.bign{font-weight:900;font-size:120px;line-height:1;color:var(--hi);white-space:nowrap}
+.bigc{font-size:34px;font-weight:300;margin:20px 0 0;color:var(--paper);line-height:1.3}
+.big3 .cap{width:100%}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:28px 60px;margin-top:44px}
+.stat{padding:28px 34px;border-radius:20px;background:var(--card);box-shadow:0 8px 30px rgba(0,0,0,.06)}
+.stat.lit{outline:3px solid var(--hi);background:rgba(8,102,255,.06)}
+.stat .n{font-weight:900;font-size:72px;line-height:1.05;color:var(--paper);font-variant-numeric:tabular-nums}
+.stat.lit .n{color:var(--hi)}
+.stat .t{font-size:28px;font-weight:300;margin-top:8px;color:var(--paper)}
+
+.calc{list-style:none;margin:36px 0 0;padding:0}
+.calc li{font-size:36px;line-height:1.35;padding:16px 0;border-top:1px solid var(--rule)}
+.calc li:first-child{border-top:none}
+.calc li b{color:var(--hi);font-weight:900}
+.calc .res{margin-top:22px;font-size:54px;font-weight:900;color:var(--hi);border-top:none}
+
+.map{list-style:none;margin:50px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.map li{background:var(--card);border-radius:20px;padding:30px 34px;box-shadow:0 8px 30px rgba(0,0,0,.06);display:flex;gap:22px;align-items:center}
+.map .rn{flex:none;width:72px;height:72px;border-radius:50%;background:var(--hi);color:#fff;font-weight:900;font-size:40px;display:flex;align-items:center;justify-content:center}
+.map .rt{font-size:36px;font-weight:900;line-height:1.2}
+
+.offer{flex-direction:row;gap:70px;align-items:stretch;padding-top:80px;padding-bottom:80px}
+.offer .ol{flex:1.35;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.offer ul.b{margin-top:26px}
+.offer ul.b li{font-size:32px;padding-top:12px;padding-bottom:12px}
+.offer ul.b li::before{top:28px}
+.offer .or{flex:.8;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:var(--card);border-radius:26px;box-shadow:0 10px 36px rgba(0,0,0,.08);padding:40px}
+.strike{font-weight:900;font-size:64px;color:var(--mute);text-decoration:line-through}
+.price{font-weight:900;font-size:140px;color:var(--ok);line-height:1;margin-top:10px}
+.pnote{font-size:26px;font-weight:300;margin-top:14px;color:var(--paper)}
+.ask2{margin-top:24px;font-size:44px;font-weight:900;color:var(--hi)}
+
+.prompt{margin-top:40px;background:var(--paper);color:var(--ink);border-radius:22px;padding:36px 44px;font-size:34px;line-height:1.55;max-width:1300px}
+.prompt .pl{display:block;font-size:22px;font-weight:900;color:#8FB0FF;margin-bottom:12px;letter-spacing:.04em}
+.ex{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;margin-top:44px}
+.exc{background:var(--card);border-radius:22px;padding:32px 34px;box-shadow:0 8px 30px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:14px}
+.exc.lit{outline:3px solid var(--hi);background:rgba(8,102,255,.05)}
+.exc .k{font-size:24px;font-weight:900;color:var(--mute)}
+.exc .tg{font-size:40px;font-weight:900;color:var(--hi);line-height:1.2}
+.exc .d{font-size:27px;font-weight:300;line-height:1.4;color:var(--paper)}
+.form{display:flex;align-items:stretch;gap:18px;margin-top:44px}
+.form .fp{flex:1;min-width:0;background:var(--card);border-radius:20px;padding:26px 24px;box-shadow:0 8px 30px rgba(0,0,0,.06);text-align:center}
+.form .fp b{display:block;font-size:44px;font-weight:900;color:var(--hi)}
+.form .fp span{display:block;font-size:24px;font-weight:300;margin-top:8px;color:var(--paper);line-height:1.35}
+.form .fp.lit{outline:3px solid var(--hi);background:rgba(8,102,255,.05)}
+.form .plus{align-self:center;font-size:48px;font-weight:900;color:var(--mute)}
+.fex{margin-top:40px;font-size:34px;line-height:1.5;background:var(--paper);color:var(--ink);border-radius:20px;padding:30px 40px}
+.fex .pl{display:block;font-size:22px;font-weight:900;color:#8FB0FF;margin-bottom:8px}
+.q .label{text-align:center}
+.q h1{font-size:76px;text-align:center;margin:0 auto;max-width:1300px}
+.corner{position:absolute;top:36px;inset-inline-start:44px;font-size:22px;font-weight:900;color:var(--hi);border:2px solid var(--hi);border-radius:14px;padding:10px;background:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
+.corner img{width:150px;height:150px;display:block}
+.offer .or .qr{width:190px;height:190px;margin-top:18px;display:block}
+
+@media (max-width:900px){
+  #app{grid-template-columns:1fr;grid-template-rows:minmax(240px,45vh) 1fr auto}
+  #notes{border-inline-start:none;border-top:1px solid var(--panel-rule)}
+}
+</style>
+
+<div id="app">
+  <div id="stageWrap"><div id="frame"><div id="prog"><i></i></div></div></div>
+  <aside id="notes">
+    <div id="meta"><span class="big" id="counter">1 / 1</span><span id="elapsed">00:00</span></div>
+    <div><p class="nl">השקף הזה</p><p id="roleTxt" style="font-weight:900;font-size:1.1rem;margin:0"></p></div>
+    <div><p class="nl">נקודות</p><ul id="beatsUl"></ul></div>
+    <div id="askBox" hidden><p class="nl">שאלה לצ'אט</p><p id="askTxt" style="font-size:1.1rem;font-weight:900;margin:0"></p></div>
+    <div><p class="nl" style="cursor:pointer" id="sayToggle" tabindex="0" role="button">תסריט מלא ◂</p><p id="sayTxt" hidden></p></div>
+    <div><p class="nl">לחיצה</p><p id="clickTxt"></p></div>
+    <div><p class="nl">הבא</p><p id="nextTxt"></p></div>
+  </aside>
+  <div id="bar">
+    <button id="next" type="button">הבא ←</button>
+    <button id="prev" type="button">→ הקודם</button>
+    <span class="kbd">רווח או חיצים כדי להתקדם. Esc יוצא ממצב במה.</span>
+    <span class="spacer"></span>
+    <button id="resetT" type="button">איפוס שעון</button>
+    <button id="stageHere" type="button">מצב במה בחלון הזה</button>
+    <button id="openStage" type="button">פתיחת במה בלשונית חדשה</button>
+  </div>
+</div>
+
+<script>
+/* ================= CONTENT ================= */
+const LINK='https://pay.grow.link/ODg1ODk~2af9cb4c0353afd7b933a6cbe85b728c-NDEwNDcyNg';
+const S=[
+{L:'A',size:'xl',h:'לקוחות בדולרים',sub:'סדנת ההמשך',role:'פתיחה.',beats:['ברוכים הבאים לסדנת ההמשך.','ארבעה שיעורים, עד קמפיין באוויר.'],
+ say:'ברוכים הבאים לסדנת ההמשך של לקוחות בדולרים.\n\nבארבעת השיעורים האלה אנחנו עוברים מההצעה הראשונה ועד קמפיין באוויר.',click:'אחרי הפתיחה.'},
+{L:'A',label:'שיעור 1 מתוך 4',size:'xl',h:'הבידול וההצעה',sub:'למי פונים, מה מבדל אתכם, ואיזו הצעה בחינם תגרום לבעל עסק ישראלי בארה״ב לקבוע פגישה.',role:'פתיחת שיעור 1.',beats:['מה עושים בשיעור הזה.','המטרה.'],
+ say:'שיעור ראשון: הבידול וההצעה.\n\nבסוף השיעור הזה תדעו למי אתם פונים, מה מבדל אתכם, ואיזו הצעה בחינם תגרום לבעל עסק ישראלי בארה״ב לקבוע איתכם פגישה.',click:'אחרי המטרה.'},
+{L:'T',label:'שיעור 1: הבידול וההצעה',h:'שלוש שאלות הבידול',b:['במה אתם הכי טובים?','לאיזה סוג עסק כבר הבאתם תוצאה?','מה הלקוח מקבל אצלכם, ולא אצל אחרים?'],role:'שלוש השאלות.',beats:['לכתוב תשובות לכל שאלה.','לא לחשוב יותר מדי. לכתוב.'],
+ say:'לפני מודעה, לפני עמוד, צריך לדעת מה אתם מוכרים ולמי.\n\nשלוש שאלות. במה אתם הכי טובים? לאיזה סוג עסק כבר הבאתם תוצאה? ומה הלקוח מקבל אצלכם, ולא אצל אחרים?\n\nעצרו את הסרטון, ותכתבו תשובה לכל אחת.',click:'אחרי השאלה השלישית.'},
+{L:'PR',label:'שיעור 1: הבידול וההצעה',h:'עכשיו תנו לצ\'אט לעבוד',sub:'קחו את כל מה שכתבתם, והדביקו לצ\'אט.',pl:'מה כותבים לצ\'אט',prompt:'הנה כל מה שכתבתי על העסק שלי: [התשובות שלכם]. אני צריך בידול, כי אני לא רוצה להישמע כמו כל אחד אחר בשוק שלי. תן לי שלושה כיווני בידול, ולכל אחד משפט אחד שמסביר אותו.',role:'לתת לצ\'אט לבנות את הבידול. להדגים מול המצלמה, על עסק אמיתי.',beats:['לקחת את כל התשובות.','להדביק לצ\'אט.','"אני לא רוצה להישמע כמו כולם."'],
+ say:'עכשיו קחו את כל מה שכתבתם, והדביקו לצ\'אט.\n\nותגידו לו בפשטות: אני צריך בידול, כי אני לא רוצה להישמע כמו כל אחד אחר בשוק שלי.\n\nתבקשו שלושה כיוונים, ולכל אחד משפט אחד שמסביר אותו. ואז תבחרו את זה שמרגיש הכי נכון לכם.',click:'אחרי "הכי נכון לכם".'},
+{L:'T',label:'שיעור 1: הבידול וההצעה',h:'שתי טעויות נפוצות',b:['"אני עושה הכול." מי שעושה הכול, לא נבחר לשום דבר.','מחיר זול בתור בידול. זה לא בידול, זו הנחה.'],role:'הטעויות.',beats:['עושה הכול.','מחיר זול.'],
+ say:'שתי טעויות שאני רואה כל הזמן.\n\nהראשונה: "אני עושה הכול". מי שעושה הכול, לא נבחר לשום דבר.\n\nהשנייה: מחיר זול. זה לא בידול, זו הנחה.',click:'אחרי "זו הנחה".'},
+{L:'FORM',label:'שיעור 1: הבידול וההצעה',h:'נוסחת ההצעה בחינם',parts:[['פגישה','מה הם מקבלים'],['תוצאה','עם מה הם יוצאים'],['קהל','למי בדיוק זה מיועד'],['זמן','כמה זה לוקח. חובה.',1]],example:'פגישת אבחון של 30 דקות, שבה בעלי עסקים ישראלים בארצות הברית יוצאים עם שלוש דרכים להביא יותר לקוחות.',role:'שלב 2: הנוסחה של הצעה בחינם.',beats:['פגישה, תוצאה, קהל, זמן.','הזמן חובה. בלי זמן זה נשמע כמו שיחת מכירה.','לחיצה: דוגמה.'],
+ say:'עכשיו ההצעה בחינם.\n\nלמה פגישה? כי זה הדבר שהכי קל להגיד לו כן.\n\nאבל הצעה חזקה בנויה מארבעה חלקים. פגישה: מה הם מקבלים. תוצאה: עם מה הם יוצאים. קהל: למי בדיוק זה מיועד. וזמן.\n\nהזמן חובה. "תוך 30 דקות". בלי זמן, זה נשמע כמו שיחת מכירה שלא נגמרת.\n\n[לחיצה]\n\nלמשל: פגישת אבחון של 30 דקות, שבה בעלי עסקים ישראלים בארצות הברית יוצאים עם שלוש דרכים להביא יותר לקוחות.\n\nובפגישה עצמה אתם לא מוכרים. אתם מאבחנים.',click:'לחיצה אחת חושפת את הדוגמה.'},
+{L:'F',label:'שיעור 1: הבידול וההצעה',h:'שתי דרכים לאבחן',cols:[['מאבחנים בפגישה',['שואלים, מקשיבים, ומאבחנים בזמן אמת.','פשוט להכנה, ומתאים כשאין מספיק מידע מראש.']],['מאבחנים לפני, ומגיעים עם משהו',['מבקשים פרטים מראש: אתר, עמוד פייסבוק, מודעות.','מגיעים לפגישה עם אבחון מוכן, או דוגמה שהכנתם להם.','הערך מורגש עוד לפני שאמרתם מילה.']]],role:'שלב 2: איפה קורה האבחון.',beats:['בפגישה: מאבחנים בזמן אמת.','לפני: מגיעים עם משהו ביד.','שתיהן עובדות. לבחור מה שמתאים לכם.'],
+ say:'ויש שתי דרכים לעשות את האבחון.\n\nהראשונה: מאבחנים בפגישה עצמה. שואלים, מקשיבים, ומאבחנים בזמן אמת. פשוט להכנה.\n\nהשנייה: מאבחנים לפני. מבקשים פרטים מראש, כמו האתר, עמוד הפייסבוק או המודעות שלהם, ומגיעים לפגישה עם משהו ביד. אבחון מוכן, או דוגמה שהכנתם להם.\n\nבדרך השנייה הם מרגישים את הערך עוד לפני שאמרתם מילה. שתי הדרכים עובדות. תבחרו את מה שמתאים לכם.',click:'אחרי "שמתאים לכם".'},
+{L:'FORM',label:'שיעור 1: הבידול וההצעה',h:'ההצעה של הסוכנות',parts:[['פגישה','פגישת התייעלות עסקית עם בינה מלאכותית'],['תוצאה','תוכנית פעולה: איפה לחסוך זמן, כסף וכוח אדם'],['קהל','בעלי עסקים ישראלים בארצות הברית'],['זמן','45 דקות, אונליין',1]],exLabel:'איך זה עבד',example:'לפני הפגישה בוחנים את העסק: העמודים, האתר והמודעות. מגיעים עם דוח במתנה, ועוברים עליו יחד בפגישה. יוצאים עם תוכנית ביד.',role:'שלב 2: דוגמה אמיתית. הדרך השנייה, אבחון לפני הפגישה.',beats:['פגישת התייעלות עסקית עם בינה מלאכותית.','בוחנים מראש: עמודים, אתר, מודעות.','מגיעים עם דוח במתנה.','45 דקות, אונליין.'],
+ say:'וככה זה נראה אצל הסוכנות.\n\nההצעה הייתה פגישת התייעלות עסקית עם בינה מלאכותית. 45 דקות, אונליין, ללא עלות. ויוצאים ממנה עם תוכנית פעולה: איפה הבינה המלאכותית תחסוך לעסק זמן, כסף וכוח אדם.\n\n[לחיצה]\n\nלפני הפגישה בוחנים את העסק: העמודים, האתר והמודעות. מגיעים לפגישה עם דוח, במתנה, ועוברים עליו יחד.\n\nזו בדיוק הדרך השנייה שדיברנו עליה: מאבחנים לפני, ומגיעים עם משהו ביד.',click:'לחיצה אחת חושפת איך זה עובד.'},
+{L:'T',label:'שיעור 1: הבידול וההצעה',h:'הקופי של ההצעה והאודיט',b:['בינה מלאכותית כותבת את הקופי של ההצעה.','בינה מלאכותית בודקת את העסק, חוקרת ומעצבת את הדוח.','את הדוח מראים ללקוח בפגישה.'],role:'להדגים: כתיבת ההצעה ועיצוב הדוח.',beats:['הקופי של ההצעה.','האודיט: בודקת, חוקרת, מעצבת.','להדגים מול המצלמה.'],
+ say:'ועכשיו שני דברים שהבינה המלאכותית עושה בשבילכם.\n\nהראשון: הקופי של ההצעה.\n\nהשני: האודיט, הדוח שתראו ללקוח בפגישה. היא בודקת את העסק שלו, חוקרת, ומעצבת לכם את הדוח.\n\nבואו נראה את זה.\n\n[הדגמה מול המצלמה.]',click:'אחרי ההדגמה.'},
+{L:'A',label:'שיעור 2 מתוך 4',size:'xl',h:'עמוד הנחיתה והסינון',sub:'עמוד אחד, עם טופס סינון והזמנה ישר ליומן.',role:'פתיחת שיעור 2.',beats:['מה עושים בשיעור הזה.','המטרה.'],
+ say:'שיעור שני: עמוד הנחיתה והסינון.\n\nהמטרה: עמוד אחד, עם טופס סינון, והזמנה ישר ליומן.',click:'אחרי המטרה.'},
+{L:'B',label:'שיעור 2: עמוד הנחיתה והסינון',h:'המבנה של העמוד',b:['כותרת עם ההבטחה, ולמי זה.','"ללא עלות", בולט.','מה מקבלים בפגישה.','למי זה מתאים.','כפתור אחד: קבעו פגישה.'],img:'img/landing.png',tall:true,vis:'צילום מסך: עמוד הנחיתה של הסוכנות',role:'שלב 3: מבנה העמוד.',beats:['ארבעה חלקים.','לעבור על העמוד בצילום המסך.'],
+ say:'זה העמוד של הסוכנות, והוא פשוט. למעלה: למי זה, וכותרת עם ההבטחה. "ללא עלות", בולט. משפט אחד שמסביר עם מה יוצאים.\n\nאחר כך: מה מקבלים בפגישה, חמש שורות. ולמי זה מתאים.\n\nוכפתור אחד: קבעו לי פגישה ללא עלות. בלי תפריט, בלי הסחות.',click:'אחרי המעבר על העמוד.'},
+{L:'B',label:'שיעור 2: עמוד הנחיתה והסינון',h:'לבנות את העמוד עם בינה מלאכותית',b:['שאלות סינון לפני הפגישה.','בחירת מועד ישר ביומן.'],img:'img/ai-booking.png',book:true,chip:'בינה מלאכותית עושה את זה ב־3 דקות',vis:'עמוד נחיתה עם טופס סינון ויומן',role:'הדגמה: בניית העמוד. לצלם את כל התהליך.',beats:['צריך עמוד, טופס ויומן.','פעם זה היה פרויקט.','היום: 3 דקות.'],
+ say:'עכשיו בונים את העמוד עם בינה מלאכותית.\n\nפעם זה היה פרויקט של שבוע, עם מעצב ומתכנת. היום זה לוקח כמה דקות.\n\nבואו נראה.\n\n[לצלם את כל התהליך, מההתחלה ועד העמוד המוכן.]',click:'אחרי "שלוש דקות" (מופיע הכיתוב).'},
+{L:'A',label:'שיעור 2: עמוד הנחיתה והסינון',h:'חיבור לקלנדלי',sub:'הכפתור בעמוד מוביל ישר ליומן שלכם.',role:'הדגמה: חיבור העמוד לקלנדלי.',beats:['פותחים סוג פגישה בקלנדלי.','מחברים את הכפתור.'],
+ say:'עכשיו מחברים את העמוד ליומן.\n\nהכפתור בעמוד מוביל ישר לקלנדלי, והפגישה נכנסת לבד ליומן שלכם.\n\n[הדגמה מול המצלמה.]',click:'אחרי ההדגמה.'},
+{L:'B',label:'שיעור 2: עמוד הנחיתה והסינון',h:'שאלות סינון',b:['כמה עובדים יש בעסק? מי שעובד לבד, כנראה לא יקנה ריטיינר.','יש לכם קמפיין פעיל? אז הם כבר משקיעים בצמיחה.','מה הכי גוזל לכם זמן? את התשובה לוקחים לפגישה.'],img:'img/calendly-form.png',form:true,vis:'טופס קביעת הפגישה',role:'שלב 3: למה מסננים.',beats:['שאלות הסינון.','כל פגישה מבוזבזת עולה זמן.'],
+ say:'ועכשיו החלק שהכי הרבה אנשים מדלגים עליו: סינון.\n\nלפני שמישהו קובע פגישה, הוא עונה על כמה שאלות.\n\nכמה עובדים יש בעסק? מי שעובד לבד, כנראה לא יקנה ריטיינר.\n\nיש לכם כרגע קמפיין פרסום פעיל? זה אומר שהם כבר משקיעים בצמיחה.\n\nומה הכי גוזל לכם זמן בעסק היום? את התשובה הזאת לוקחים איתכם לפגישה. ככה אתם מגיעים מוכנים.\n\nלמה? כי כל פגישה עם מי שלא רלוונטי עולה לכם שעה. הסינון הוא מה שהפך את זה ל־45 ₪ לפגישה עם לקוח אמיתי.',click:'אחרי "לקוח אמיתי".'},
+{L:'A',label:'שיעור 3 מתוך 4',size:'xl',h:'הקריאייטיב',sub:'מודעות בעברית שעוצרות את הגלילה.',role:'פתיחת שיעור 3.',beats:['מה עושים בשיעור הזה.','המטרה.'],
+ say:'שיעור שלישי: הקריאייטיב.\n\nהמטרה: מודעות בעברית שעוצרות את הגלילה.',click:'אחרי המטרה.'},
+{L:'T',label:'שיעור 3: הקריאייטיב',h:'תכנון',b:['זווית אחת לכל מודעה.','משהו שהם מזהים מהחיים שלהם.'],role:'תכנון המודעה.',beats:['זווית אחת.','לזהות את עצמם.'],
+ say:'לפני שמעצבים, מתכננים.\n\nזווית אחת לכל מודעה. לא לדחוס הכול למודעה אחת.\n\nומה עוצר את הגלילה: משהו שהם מזהים מהחיים שלהם.',click:'אחרי "מהחיים שלהם".'},
+{L:'T',label:'שיעור 3: הקריאייטיב',h:'דגשי עיצוב',b:['מסר אחד, וטקסט גדול.','ניגודיות חזקה.','פונט עברי קריא.','מספר אחד שעוצר את הגלילה.'],role:'דגשי עיצוב.',beats:['מסר אחד.','ניגודיות.','פונט.','מספר אחד.'],
+ say:'ארבעה דגשים בעיצוב.\n\nמסר אחד, וטקסט גדול. אנשים רואים את המודעה בטלפון, לשנייה.\n\nניגודיות חזקה.\n\nפונט עברי קריא.\n\nומספר אחד שעוצר את הגלילה.',click:'אחרי הדגש הרביעי.'},
+{L:'B',label:'שיעור 3: הקריאייטיב',h:'הקופי',b:['פרימרי טקסט, כותרת ותיאור.','פותחים במספרים שכואבים: כמה עולה כוח אדם.','מראים מה סוכן בינה מלאכותית עושה במקום.','מורידים את הפחד: "אני לא אומר לפטר אף אחד."','ההצעה: ללא עלות, ומה יוצאים איתו.','קריאה אחת לפעולה.'],img:'img/ad-copy.png',copy:true,vis:'הקופי של המודעה של הסוכנות',role:'שלב 4: מבנה הקופי.',beats:['מספרים שכואבים.','מה הסוכן עושה במקום.','להוריד את הפחד.','הצעה ללא עלות.','קריאה אחת.'],
+ say:'עכשיו הקופי. יש לו שלושה חלקים: הפרימרי טקסט, הכותרת והתיאור. בואו נפרק את המודעה של הסוכנות, שורה אחרי שורה.\n\nפותחים במספרים: עובד אדמיניסטרטיבי, 4,000 דולר בחודש. נציג שירות, 3,500. בעל עסק בארצות הברית קורא את זה ומרגיש את זה בכיס.\n\nואז: חלק גדול ממה שהם עושים, סוכן בינה מלאכותית עושה היום. מהר יותר, בלי טעויות.\n\nואז מורידים את הפחד: אני לא אומר לפטר אף אחד. אני אומר שאפשר לגדול בלי לגייס עוד.\n\nההצעה: פגישת התייעלות עסקית, ללא עלות. עוברים על העסק, מוצאים 3 עד 10 מקומות לחסוך, ויוצאים עם תוכנית פעולה.\n\nוקריאה אחת לפעולה: קבעו פגישה.\n\nשימו לב גם לכותרת: "כמה עולה לכם כוח אדם בארה״ב? בואו נחסוך חלק מזה." שאלה, ומיד ההבטחה.',click:'אחרי "ומיד ההבטחה".'},
+{L:'B',label:'שיעור 3: הקריאייטיב',h:'שתי המודעות של הסוכנות',b:['הראשונה: מספר אחד גדול, 4,000 דולר בחודש.','השנייה: פגישת ההתייעלות, ומה מקבלים בה.'],imgs:['img/ad-5.jpg','img/ad-6.jpg'],vis:'דוגמאות למודעות של הסוכנות',role:'הדגמה: שתי המודעות.',beats:['מסר אחד.','ניגודיות.','פונט.'],
+ say:'ועכשיו בואו נראה את זה על מודעות אמיתיות. תסתכלו על שתי המודעות של הסוכנות. בראשונה: מספר אחד גדול, 4,000 דולר בחודש, וכל השאר משרת אותו. בשנייה: מה מקבלים בפגישה, ברשימה שנקראת בשנייה.',click:'אחרי הדוגמאות.'},
+{L:'A',label:'שיעור 3: הקריאייטיב',h:'היגספילד, והדרך החינמית בלעדיו',sub:'שתי דרכים ליצור את הקריאייטיב.',role:'הדגמה: שתי הדרכים.',beats:['עם היגספילד.','בלי, בחינם.'],
+ say:'ויש שתי דרכים ליצור את הקריאייטיב.\n\nעם היגספילד. ובלי, בדרך חינמית, למי שלא רוצה לשלם על עוד כלי.\n\n[הדגמה של שתי הדרכים.]',click:'אחרי ההדגמה.'},
+{L:'A',label:'שיעור 4 מתוך 4',size:'xl',h:'הקמפיין',sub:'החלק הטכני: מנהל המודעות, הפיקסל וההמרה.',role:'פתיחת שיעור 4.',beats:['מה עושים בשיעור הזה.','המטרה.'],
+ say:'שיעור רביעי: הקמפיין.\n\nמתחילים בחלק הטכני: מנהל המודעות, הפיקסל וההמרה.',click:'אחרי המטרה.'},
+{L:'T',label:'שיעור 4: הקמפיין',h:'החלק הטכני',b:['פתיחת חשבון במנהל המודעות.','הטמעת פיקסל בעמוד הנחיתה.','הגדרת המרה.'],role:'הדגמה: שלושת השלבים הטכניים.',beats:['חשבון במנהל המודעות.','פיקסל בעמוד.','המרה.'],
+ say:'שלושה שלבים טכניים.\n\nפותחים חשבון במנהל המודעות.\n\nמטמיעים פיקסל בעמוד הנחיתה.\n\nומגדירים המרה, כדי שכל פגישה שנקבעת תיספר.\n\n[הדגמה מול המצלמה.]',click:'אחרי ההדגמה.'},
+];
+/* ================= RENDER ================= */
+const frame=document.getElementById('frame');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const bullets=a=>'<ul class="b">'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+const visBox=(s)=>s.imgs?'<div class="vis real duo">'+s.imgs.map(u=>'<img src="'+u+'" alt="">').join('')+'</div>':s.img?'<div class="vis real'+(s.fit==='contain'?' contain':'')+(s.portrait?' portrait':'')+(s.tall?' tallimg':'')+(s.copy?' copyimg':'')+(s.form?' formimg':'')+(s.book?' bookimg':'')+'"><img src="'+s.img+'" alt="'+esc(s.h)+'" onerror="this.parentNode.className=\'vis\';this.parentNode.innerHTML=\'<div><b>ויזואל</b>'+esc(s.vis||'')+'</div>\'"></div>':'<div class="vis"><div><b>ויזואל</b>'+esc(s.vis||'')+'</div></div>';
+const AIT=['עמוד נחיתה, סינון ויומן','קופי להצעה, ועיצוב האודיט','קופי לקמפיין','יצירת קריאייטיב','בניית הקמפיין','לחבר הכל, זה לזה'];
+const trk=n=>'<div class="trk'+(n>=AIT.length?' all':'')+'"><div class="tl">מי עושה מה</div>'+AIT.map((t,i)=>{const you=i===AIT.length-1;const st=n>=AIT.length?(you?'cur':'done'):i<n?'done':i===n?'cur':'';return '<div class="ti '+st+(you?' you':'')+'"><span class="ck">'+(st==='done'?'✓':(i+1))+'</span><span>'+esc(t)+'</span><span class="tag">'+(you?'אתם':'בינה מלאכותית')+'</span></div>'}).join('')+'</div>';
+function render(s){
+  let inner='',cls='slide';
+  const hcls=s.size==='xl'?'h-xl':'h-l';
+  const lab=s.label?'<p class="label">'+esc(s.label)+'</p>':'';
+  switch(s.L){
+    case 'A':cls+=' center';
+      inner=lab+'<h1 class="'+hcls+'">'+esc(s.h)+'</h1>'+(s.sub?'<p class="sub">'+esc(s.sub)+'</p>':'')
+        +(s.frags||[]).map(f=>'<h1 class="h-l frag" style="margin-top:36px">'+esc(f)+'</h1>').join('')
+        +(s.sub2?'<p class="sub frag">'+esc(s.sub2)+'</p>':'');break;
+    case 'T':inner=lab+'<h1 class="h-l">'+esc(s.h)+'</h1>'+bullets(s.b);break;
+    case 'B':cls+=' split';inner='<div class="txt">'+lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+bullets(s.b)+'</div>'+visBox(s);break;
+    case 'C':cls+=' lc';inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+visBox(s)+(s.cap?'<p class="cap">'+esc(s.cap)+'</p>':'');break;
+    case 'F':cls+=' split';inner='<div class="txt" style="flex:1 1 100%">'+lab+'<h1 class="h-m">'+esc(s.h)+'</h1><div style="display:flex;gap:60px;margin-top:20px">'+s.cols.map(c=>'<div style="flex:1;min-width:0"><p class="label" style="margin:20px 0 0;font-size:34px">'+esc(c[0])+'</p>'+bullets(c[1])+'</div>').join('')+'</div></div>';break;
+    case 'BIG3':cls+=' big3';inner='<h1 class="h-m">'+esc(s.h)+'</h1>'+s.cells.map(c=>'<div class="cell"><div class="bign">'+esc(c[0])+'</div><p class="bigc">'+esc(c[1])+'</p></div>').join('')+(s.cap?'<p class="cap" style="margin-top:50px">'+esc(s.cap)+'</p>':'');break;
+    case 'STATS':inner='<h1 class="h-m">'+esc(s.h)+'</h1><div class="stats">'+s.stats.map(x=>'<div class="stat'+(x[2]?' lit':'')+'"><div class="n">'+esc(x[0])+'</div><div class="t">'+esc(x[1])+'</div></div>').join('')+'</div>';break;
+    case 'CALC':inner='<h1 class="h-m">'+esc(s.h)+'</h1><ul class="calc">'+s.calc.map((x,i)=>'<li'+(i>1?' class="frag"':'')+'>'+x+'</li>').join('')+'<li class="res frag">'+esc(s.res)+'</li></ul>';break;
+    case 'MAP':inner='<h1 class="h-l" style="text-align:center">'+esc(s.h)+'</h1><ol class="map">'+s.steps.map((t,i)=>'<li><span class="rn">'+(i+1)+'</span><span class="rt">'+esc(t)+'</span></li>').join('')+'</ol>';break;
+    case 'OFFER':cls+=' offer';inner='<div class="ol"><h1 class="h-m">'+esc(s.h)+'</h1><p class="sub" style="font-size:32px;margin-top:20px">'+esc(s.sub)+'</p>'+bullets(s.items)+'</div><div class="or"><div class="strike">2,870 ₪</div><div class="price">1,897 ₪</div><div class="pnote">אחרי זיכוי של 147 ₪ למשתתפי ההדרכה</div><div class="ask2">מעניין אתכם?</div><img class="qr" src="img/qr.png" alt="קוד QR להרשמה לסדנת ההמשך"></div>';break;
+    case 'PR':inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+(s.sub?'<p class="sub" style="margin-top:20px">'+esc(s.sub)+'</p>':'')+'<div class="prompt"><span class="pl">'+esc(s.pl||'')+'</span>'+esc(s.prompt)+'</div>';break;
+    case 'EX':inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1><div class="ex">'+s.ex.map((e,i)=>'<div class="exc'+(i===0?' lit':'')+'"><div class="k">'+esc(e[0])+'</div><div class="tg">'+esc(e[1])+'</div><div class="d">'+esc(e[2])+'</div></div>').join('')+'</div>';break;
+    case 'FORM':inner=lab+'<h1 class="h-m">'+esc(s.h)+'</h1><div class="form">'+s.parts.map((p,i)=>(i?'<div class="plus">+</div>':'')+'<div class="fp'+(p[2]?' lit':'')+'"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>').join('')+'</div><div class="fex frag"><span class="pl">'+esc(s.exLabel||'דוגמה')+'</span>'+esc(s.example)+'</div>';break;
+    case 'AI':cls+=' split';inner='<div class="txt">'+lab+'<h1 class="h-m">'+esc(s.h)+'</h1>'+(s.sub?'<p class="aisub">'+esc(s.sub)+'</p>':'')+(s.note?'<div class="ainote frag">'+esc(s.note)+'</div>':'')+'</div>'+trk(s.n);break;
+    case 'Q':cls+=' center q';inner=lab+'<h1>'+esc(s.h)+'</h1>';break;
+  }
+  if(s.foot)inner+='<p class="foot">'+esc(s.foot)+'</p>';
+  if(s.corner)inner+='<div class="corner"><img src="img/qr.png" alt=""><span>סדנת ההמשך</span></div>';
+  if(s.ask)inner+='<div class="askchip">'+esc(s.ask)+'</div>';
+  if(s.chip)inner+='<div class="askchip frag">'+esc(s.chip)+'</div>';
+  const el=document.createElement('section');el.className=cls;el.innerHTML=inner;return el;
+}
+const els=S.map(render);els.forEach(e=>frame.appendChild(e));
+
+/* ================= STATE + SYNC ================= */
+const KEY='usd-course';
+const isStage=location.hash==='#stage';
+if(isStage)document.body.classList.add('stage');
+let cur=0,step=0;
+try{const st=JSON.parse(localStorage.getItem(KEY)||'{}');if(Number.isInteger(st.cur)&&st.cur<S.length){cur=st.cur;step=st.step||0}}catch(e){}
+let chan=null;try{chan=new BroadcastChannel(KEY)}catch(e){}
+const fragsOf=i=>els[i].querySelectorAll('.frag');
+function apply(from){
+  els.forEach((e,i)=>{e.classList.toggle('on',i===cur);e.classList.toggle('off',i<cur)});
+  const pi=document.querySelector('#prog i');if(pi)pi.style.width=((cur+1)/S.length*100)+'%';
+  fragsOf(cur).forEach((f,i)=>f.classList.toggle('show',i<step));
+  if(!isStage){
+    const s=S[cur];
+    document.getElementById('counter').textContent=(cur+1)+' / '+S.length;
+    document.getElementById('sayTxt').textContent=s.say+(s.note?'\n\n'+s.note:'');
+    document.getElementById('roleTxt').textContent=s.role||'';
+    document.getElementById('beatsUl').innerHTML=(s.beats||[]).map(b=>'<li>'+esc(b)+'</li>').join('');
+    document.getElementById('clickTxt').textContent=s.click||'';
+    document.getElementById('askBox').hidden=!s.ask;
+    document.getElementById('askTxt').textContent=s.ask||'';
+    const nx=S[cur+1];document.getElementById('nextTxt').textContent=nx?('← '+nx.h):'סוף המצגת';
+  }
+  if(from!=='remote'){
+    const st={cur,step,t:Date.now()};
+    try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}
+    if(chan)chan.postMessage(st);
+  }
+}
+function next(){const n=fragsOf(cur).length;if(step<n){step++}else if(cur<S.length-1){cur++;step=0}apply()}
+function prev(){if(step>0){step--}else if(cur>0){cur--;step=fragsOf(cur).length}apply()}
+document.addEventListener('keydown',e=>{
+  if(e.target&&e.target.id==='sayToggle'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggleSay();return}
+  if(['ArrowLeft','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();next()}
+  else if(['ArrowRight','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev()}
+  else if(e.key==='Home'){cur=0;step=0;apply()}
+  else if(e.key==='End'){cur=S.length-1;step=0;apply()}
+  else if(e.key==='Escape'&&!isStage&&document.body.classList.contains('stage')){document.body.classList.remove('stage');fit()}
+  else if(e.key==='f'||e.key==='F'){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(err){}}
+});
+frame.addEventListener('click',e=>{const r=frame.getBoundingClientRect();(e.clientX-r.left)/r.width>0.75?prev():next()});
+if(chan)chan.onmessage=ev=>{const st=ev.data;if(!st)return;cur=st.cur;step=st.step||0;apply('remote')};
+window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const st=JSON.parse(ev.newValue);cur=st.cur;step=st.step||0;apply('remote')}catch(e){}});
+
+/* ================= SCALE ================= */
+function fit(){const w=document.getElementById('stageWrap');const pad=document.body.classList.contains('stage')?0:40;const sc=Math.min((w.clientWidth-pad)/1600,(w.clientHeight-pad)/900);frame.style.transform='scale('+Math.max(sc,.05)+')'}
+window.addEventListener('resize',fit);fit();
+
+/* ================= PRESENTER EXTRAS ================= */
+function toggleSay(){const t=document.getElementById('sayTxt');t.hidden=!t.hidden;document.getElementById('sayToggle').textContent=t.hidden?'תסריט מלא ◂':'תסריט מלא ▾'}
+if(!isStage){
+  document.getElementById('sayToggle').onclick=toggleSay;
+  document.getElementById('prev').onclick=prev;
+  document.getElementById('next').onclick=next;
+  document.getElementById('stageHere').onclick=()=>{document.body.classList.add('stage');fit();try{document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+  document.getElementById('openStage').onclick=()=>{const u=new URL(location.href);u.hash='stage';const w=window.open(u.toString(),'usd-stage');if(!w){const b=document.getElementById('openStage');b.textContent='בתוך claude.ai לשונית שנייה חסומה. השתמשו במצב במה בחלון הזה';}};
+  let t0=Date.now();const el=document.getElementById('elapsed');
+  document.getElementById('resetT').onclick=()=>{t0=Date.now()};
+  setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500);
+}
+document.fonts&&document.fonts.ready.then(fit);
+apply();
+</script>
